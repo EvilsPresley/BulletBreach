@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://gfff1sdofy78"]
+
+[ext_resource type="PackedScene" uid="uid://84xahnip7u8" path="res://scenes/abstract/building.tscn" id="1_qktg5"]
+[ext_resource type="PackedScene" uid="uid://cu12jbnwko4rp" path="res://scenes/civilian_ruins.tscn" id="2_027r7"]
+
+[node name="CivilianBuilding" instance=ExtResource("1_qktg5")]
+can_bullet_destroy = true
+civilians = true
+destroyed_scene = ExtResource("2_027r7")

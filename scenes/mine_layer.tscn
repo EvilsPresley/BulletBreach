@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://btfqwrsl5rxp1"]
+
+[ext_resource type="PackedScene" uid="uid://cenoy8v38mh1q" path="res://scenes/abstract/ennemy.tscn" id="1_ios4p"]
+[ext_resource type="Texture2D" uid="uid://5ds63o7dienv" path="res://assets/mine_layer.png" id="2_5l4tp"]
+[ext_resource type="Script" uid="uid://cs516nhos6kr3" path="res://scripts/mine_layer.gd" id="2_felsq"]
+
+[node name="MineLayer" instance=ExtResource("1_ios4p")]
+script = ExtResource("2_felsq")
+shoot_range = 0
+reload_time = 2
+
+[node name="Sprite" parent="." index="0"]
+offset_left = -18.0
+offset_right = 20.0
+offset_bottom = 13.0
+texture = ExtResource("2_5l4tp")

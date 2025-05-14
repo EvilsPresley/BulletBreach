@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://84xahnip7u8"]
+
+[ext_resource type="PackedScene" uid="uid://dyqq34kv4qpot" path="res://scenes/abstract/map_object.tscn" id="1_n8bkc"]
+[ext_resource type="Script" uid="uid://44u7h58xixww" path="res://scripts/building.gd" id="2_uvy8r"]
+
+[node name="Building" instance=ExtResource("1_n8bkc")]
+script = ExtResource("2_uvy8r")
+can_player_move = false
+can_ennemy_move = false
+can_bullet_destroy = false
+civilians = false
+skills = Array[int]([])
+destroyed_scene = null
+
+[node name="Highlight" parent="." index="1"]
+visible = false

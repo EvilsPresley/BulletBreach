@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3 uid="uid://danovudhcwut6"]
+
+[ext_resource type="PackedScene" uid="uid://d13x7v4866mt6" path="res://scenes/abstract/dialog.tscn" id="1_0cptx"]
+[ext_resource type="Script" uid="uid://cid5tcs1iqvxh" path="res://scripts/victory_dialog.gd" id="2_pfou7"]
+
+[node name="VictoryDialog" instance=ExtResource("1_0cptx")]
+script = ExtResource("2_pfou7")
+
+[node name="Title" type="RichTextLabel" parent="." index="4"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 760.0
+offset_bottom = 88.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=32][wave]Victory!"
+scroll_active = false
+
+[node name="Intro" type="RichTextLabel" parent="." index="5"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 99.0
+offset_right = 760.0
+offset_bottom = 205.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]You saved most of the civilians from the conflict.
+The inhabitants of the island are forever grateful to you, and you are now celebrated as a hero."
+scroll_active = false
+
+[node name="ScoreLabels" type="RichTextLabel" parent="." index="6"]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 209.0
+offset_right = 530.0
+offset_bottom = 383.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[left][font_size=24]Score:
+Rescued:
+Time elapsed:
+Hull damage:
+Total:"
+scroll_active = false
+
+[node name="ScoreValues" type="RichTextLabel" parent="." index="7"]
+layout_mode = 0
+offset_left = 265.0
+offset_top = 209.0
+offset_right = 629.0
+offset_bottom = 383.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[right][font_size=24]Score:
+Rescued:
+Time elapsed:
+Hull status:
+Total:"
+scroll_active = false

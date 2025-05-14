@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://dblt2aklcufm6"]
+
+[ext_resource type="PackedScene" uid="uid://d13x7v4866mt6" path="res://scenes/abstract/dialog.tscn" id="1_u4t3a"]
+
+[node name="DefeatDialog" instance=ExtResource("1_u4t3a")]
+
+[node name="Intro" type="RichTextLabel" parent="." index="4"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 99.0
+offset_right = 760.0
+offset_bottom = 354.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]Most civilians were killed, and your mech ended up too damaged to keep searching for survivors.
+
+The forces of evil prevail...
+
+...for this time!
+But numerous brave rescuers are about to show up."
+scroll_active = false
+
+[node name="Title" type="RichTextLabel" parent="." index="5"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 760.0
+offset_bottom = 88.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=32]Defeat..."
+scroll_active = false

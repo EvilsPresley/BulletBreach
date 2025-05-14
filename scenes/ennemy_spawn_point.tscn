@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://deqp36rfvoka0"]
+
+[ext_resource type="PackedScene" uid="uid://84xahnip7u8" path="res://scenes/abstract/building.tscn" id="1_sy1v2"]
+[ext_resource type="Texture2D" uid="uid://cy477qmwhtqg1" path="res://assets/spawner.png" id="2_pdcfj"]
+
+[node name="EnnemySpawnPoint" instance=ExtResource("1_sy1v2")]
+can_ennemy_move = true
+skills = Array[int]([0])
+
+[node name="Sprite" parent="." index="0"]
+offset_left = -27.0
+offset_top = -26.0
+offset_right = 29.0
+texture = ExtResource("2_pdcfj")

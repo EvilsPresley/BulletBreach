@@ -1,0 +1,41 @@
+extends MapObject
+class_name MobileObject
+
+@export var move_duration: float = 0.3
+@export var move_range: int = 1
+@export var directional_sprite: bool = false
+
+@export var direction: Vector2i: set = _set_direction
+
+var sprite_origin: Vector2
+var highlight_origin: Vector2
+
+var move_tween: Tween
+
+func _ready() -> void:
+	sprite.pivot_offset.x = sprite.size.x * .5
+	sprite_origin = sprite.position
+	highlight_origin = highlight.position
+
+func move_one_tile() -> void:
+	highlight.global_position = Map.TILEMAP.map_to_local(get_map_position() + direction) + highlight_origin
+	move_tween = create_tween()
+	move_tween.tween_property(
+		sprite, 
+		"global_position", 
+		highlight.global_position - highlight_origin + sprite_origin, 
+		move_duration)
+	move_tween.tween_callback(move_end)
+	await move_tween.finished
+
+func move_end() -> void:
+	self.global_position = highlight.global_position - highlight_origin
+	highlight.position = highlight_origin
+	sprite.position = sprite_origin
+
+func _set_direction(dir: Vector2i) -> void:
+	direction = dir
+	if dir == Map.NE or dir == Map.E or dir == Map.SE:
+		sprite.flip_h = false
+	if dir == Map.NW or dir == Map.W or dir == Map.SW:
+		sprite.flip_h = true

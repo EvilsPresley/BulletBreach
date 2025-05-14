@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://cenoy8v38mh1q"]
+
+[ext_resource type="PackedScene" uid="uid://dr8e7yx1bf0uq" path="res://scenes/abstract/mobile_object.tscn" id="1_dowks"]
+[ext_resource type="Script" uid="uid://005egip7vdgc" path="res://scripts/ennemy.gd" id="2_t1tc3"]
+[ext_resource type="Texture2D" uid="uid://dgkhaieu1fkab" path="res://assets/red_tank_E.png" id="3_gafg8"]
+[ext_resource type="Texture2D" uid="uid://bhgdyya8fkoib" path="res://assets/fire.png" id="4_n4lfa"]
+
+[node name="Ennemy" instance=ExtResource("1_dowks")]
+script = ExtResource("2_t1tc3")
+shoot_range = 5
+reload_time = 0
+
+[node name="Sprite" parent="." index="0"]
+offset_left = -12.0
+offset_top = -16.0
+offset_right = 13.0
+offset_bottom = 9.0
+texture = ExtResource("3_gafg8")
+
+[node name="Fire" type="TextureRect" parent="." index="2"]
+visible = false
+layout_mode = 0
+offset_left = -16.0
+offset_top = -24.0
+offset_right = 16.0
+offset_bottom = 8.0
+texture = ExtResource("4_n4lfa")
+
+[node name="Plan" type="Control" parent="." index="3"]
+anchors_preset = 0

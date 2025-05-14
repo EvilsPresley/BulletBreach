@@ -1,0 +1,153 @@
+[gd_scene load_steps=9 format=3 uid="uid://crc5l4e06suoo"]
+
+[ext_resource type="PackedScene" uid="uid://d13x7v4866mt6" path="res://scenes/abstract/dialog.tscn" id="1_trwn1"]
+[ext_resource type="Texture2D" uid="uid://dqgwjwy3wf6p0" path="res://assets/mech_E.png" id="2_y7ojq"]
+[ext_resource type="Texture2D" uid="uid://c08ulv1cswtg5" path="res://assets/move_button.png" id="3_msvft"]
+[ext_resource type="Texture2D" uid="uid://cm1hrpcjy7kpq" path="res://assets/teleport_button.png" id="4_ndfmp"]
+[ext_resource type="Texture2D" uid="uid://oiphptw7xcqe" path="res://assets/charge_button.png" id="5_4lbkp"]
+[ext_resource type="Texture2D" uid="uid://2dhr6enqwb5w" path="res://assets/heart.png" id="6_1pjk7"]
+[ext_resource type="Texture2D" uid="uid://bw6166r02cl17" path="res://assets/civilian_building.png" id="7_ndfmp"]
+[ext_resource type="Texture2D" uid="uid://5aahhbhko2or" path="res://assets/civilians.png" id="8_4lbkp"]
+
+[node name="WelcomeDialog" instance=ExtResource("1_trwn1")]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." index="4"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 760.0
+offset_bottom = 88.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=32]Welcome new Pilot!"
+scroll_active = false
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="." index="5"]
+clip_contents = false
+layout_mode = 0
+offset_left = 135.0
+offset_top = 102.0
+offset_right = 473.0
+offset_bottom = 180.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]This is your mecha.
+And its hull status."
+scroll_active = false
+
+[node name="TextureRect" type="TextureRect" parent="." index="6"]
+layout_mode = 0
+offset_left = 447.0
+offset_top = 100.0
+offset_right = 489.0
+offset_bottom = 140.0
+scale = Vector2(2, 2)
+mouse_filter = 2
+texture = ExtResource("2_y7ojq")
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="." index="7"]
+clip_contents = false
+layout_mode = 0
+offset_left = 251.0
+offset_top = 192.0
+offset_right = 779.0
+offset_bottom = 270.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]Use these buttons to toggle move mode.
+Walk, Blink or Charge. Beware of cooldowns!"
+scroll_active = false
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="." index="8"]
+clip_contents = false
+layout_mode = 0
+offset_left = 26.0
+offset_top = 280.0
+offset_right = 554.0
+offset_bottom = 358.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]Your goal is to rescue the civilians,
+1 by 1, by moving next to them."
+scroll_active = false
+
+[node name="TextureRect2" type="TextureRect" parent="." index="9"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 195.0
+offset_right = 80.0
+offset_bottom = 235.0
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("3_msvft")
+
+[node name="TextureRect3" type="TextureRect" parent="." index="10"]
+layout_mode = 0
+offset_left = 115.0
+offset_top = 196.0
+offset_right = 155.0
+offset_bottom = 236.0
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("4_ndfmp")
+
+[node name="TextureRect4" type="TextureRect" parent="." index="11"]
+layout_mode = 0
+offset_left = 187.0
+offset_top = 197.0
+offset_right = 227.0
+offset_bottom = 237.0
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("5_4lbkp")
+
+[node name="TextureRect5" type="TextureRect" parent="." index="12"]
+layout_mode = 0
+offset_left = 521.0
+offset_top = 114.0
+offset_right = 553.0
+offset_bottom = 146.0
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("6_1pjk7")
+
+[node name="TextureRect6" type="TextureRect" parent="." index="13"]
+layout_mode = 0
+offset_left = 575.0
+offset_top = 114.0
+offset_right = 607.0
+offset_bottom = 146.0
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("6_1pjk7")
+
+[node name="TextureRect7" type="TextureRect" parent="." index="14"]
+layout_mode = 0
+offset_left = 630.0
+offset_top = 114.0
+offset_right = 662.0
+offset_bottom = 146.0
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("6_1pjk7")
+
+[node name="TextureRect8" type="TextureRect" parent="." index="15"]
+layout_mode = 0
+offset_left = 518.0
+offset_top = 283.0
+offset_right = 574.0
+offset_bottom = 318.0
+scale = Vector2(2, 2)
+mouse_filter = 2
+texture = ExtResource("7_ndfmp")
+
+[node name="TextureRect9" type="TextureRect" parent="." index="16"]
+modulate = Color(0, 1, 1, 1)
+layout_mode = 0
+offset_left = 595.0
+offset_top = 269.0
+offset_right = 651.0
+offset_bottom = 304.0
+scale = Vector2(3, 3)
+mouse_filter = 2
+texture = ExtResource("8_4lbkp")

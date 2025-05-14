@@ -1,0 +1,116 @@
+[gd_scene load_steps=8 format=3 uid="uid://b7nv6b4i1ymak"]
+
+[ext_resource type="PackedScene" uid="uid://d13x7v4866mt6" path="res://scenes/abstract/dialog.tscn" id="1_ia43x"]
+[ext_resource type="Texture2D" uid="uid://dgkhaieu1fkab" path="res://assets/red_tank_E.png" id="2_0eumr"]
+[ext_resource type="Texture2D" uid="uid://7sjmvpwhwseh" path="res://assets/artillery.png" id="3_yjvh4"]
+[ext_resource type="Texture2D" uid="uid://djyomr2salt8v" path="res://assets/kamikaze.png" id="4_5a0ic"]
+[ext_resource type="Texture2D" uid="uid://yy525x4gpoks" path="res://assets/oracle_safe_e.png" id="5_rh046"]
+[ext_resource type="Texture2D" uid="uid://bb17ep7fu1pwd" path="res://assets/oracle_danger_e.png" id="6_sxdm6"]
+[ext_resource type="Texture2D" uid="uid://cy477qmwhtqg1" path="res://assets/spawner.png" id="7_sxdm6"]
+
+[node name="WelcomeDialog2" instance=ExtResource("1_ia43x")]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." index="4"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 760.0
+offset_bottom = 88.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=32]These are your ennemies"
+scroll_active = false
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="." index="5"]
+clip_contents = false
+layout_mode = 0
+offset_left = 89.0
+offset_top = 102.0
+offset_right = 483.0
+offset_bottom = 180.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]Tank, Artillery, Kamikaze.
+Each has its own tactics."
+scroll_active = false
+
+[node name="TextureRect" type="TextureRect" parent="." index="6"]
+layout_mode = 0
+offset_left = 485.0
+offset_top = 100.0
+offset_right = 510.0
+offset_bottom = 125.0
+scale = Vector2(3, 3)
+texture = ExtResource("2_0eumr")
+
+[node name="TextureRect2" type="TextureRect" parent="." index="7"]
+layout_mode = 0
+offset_left = 578.0
+offset_top = 98.0
+offset_right = 612.0
+offset_bottom = 139.0
+scale = Vector2(2, 2)
+texture = ExtResource("3_yjvh4")
+
+[node name="TextureRect3" type="TextureRect" parent="." index="8"]
+layout_mode = 0
+offset_left = 668.0
+offset_top = 102.0
+offset_right = 705.0
+offset_bottom = 150.0
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("4_5a0ic")
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="." index="9"]
+clip_contents = false
+layout_mode = 0
+offset_left = 214.0
+offset_top = 204.0
+offset_right = 769.0
+offset_bottom = 282.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]They will target you, but you benefit from the oracle technology to predict safe moves."
+scroll_active = false
+
+[node name="TextureRect4" type="TextureRect" parent="." index="10"]
+modulate = Color(0, 1, 0.419608, 1)
+layout_mode = 0
+offset_left = 48.0
+offset_top = 201.0
+offset_right = 90.0
+offset_bottom = 236.0
+scale = Vector2(2, 2)
+texture = ExtResource("5_rh046")
+
+[node name="TextureRect5" type="TextureRect" parent="." index="11"]
+modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_left = 134.0
+offset_top = 201.0
+offset_right = 176.0
+offset_bottom = 236.0
+scale = Vector2(2, 2)
+texture = ExtResource("6_sxdm6")
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="." index="12"]
+clip_contents = false
+layout_mode = 0
+offset_left = 89.0
+offset_top = 301.0
+offset_right = 613.0
+offset_bottom = 379.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[center][font_size=24]They might destroy each other by mistake,
+ but reinforcements are infinite."
+scroll_active = false
+
+[node name="TextureRect6" type="TextureRect" parent="." index="13"]
+layout_mode = 0
+offset_left = 631.0
+offset_top = 295.0
+offset_right = 660.0
+offset_bottom = 332.0
+scale = Vector2(2, 2)
+texture = ExtResource("7_sxdm6")
