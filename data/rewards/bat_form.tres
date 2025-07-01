@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://co6psoom38al8"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_p57l4"]
+[ext_resource type="Texture2D" uid="uid://ebut3l5yjtun" path="res://assets/rewards/bats.png" id="2_p57l4"]
+
+[resource]
+script = ExtResource("1_p57l4")
+title = "Bat Form"
+type = 2
+texture = ExtResource("2_p57l4")
+description = "Turn into a bat, fly 1 tile away, avoiding attacks and leaving a trail of poison behind."
+rarity = 0
+prerequisites = Array[ExtResource("1_p57l4")]([])
+tags = Array[int]([5])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

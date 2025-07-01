@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://dxvjpardbt6ok"]
+
+[ext_resource type="PackedScene" uid="uid://cenoy8v38mh1q" path="res://scenes/abstract/ennemy.tscn" id="1_yc2uy"]
+[ext_resource type="Script" uid="uid://micrk6x2bchu" path="res://scripts/ennemies/artillery.gd" id="2_35k1q"]
+[ext_resource type="Texture2D" uid="uid://52hlk5w51156" path="res://assets/ennemies/priest_1.png" id="3_aj3vy"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_v0j58"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_woj6h"]
+resource_local_to_scene = true
+shader = ExtResource("3_v0j58")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Artillery" instance=ExtResource("1_yc2uy")]
+script = ExtResource("2_35k1q")
+reload_time = 2
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_woj6h")
+texture = ExtResource("3_aj3vy")

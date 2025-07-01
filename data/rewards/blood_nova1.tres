@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://mnjql6ou6c3l"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_v26oa"]
+[ext_resource type="Texture2D" uid="uid://cyhtoqbb4w3n6" path="res://assets/rewards/blood_nova.png" id="2_v26oa"]
+
+[resource]
+script = ExtResource("1_v26oa")
+title = "Blood Nova 1"
+type = 0
+texture = ExtResource("2_v26oa")
+description = "On first walk after using a special move, emit a blood nova around you"
+rarity = 0
+prerequisites = Array[ExtResource("1_v26oa")]([])
+tags = Array[int]([4])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://bq5rts4d7e8hk"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_rlm2j"]
+[ext_resource type="Texture2D" uid="uid://cfr0b31jtdmde" path="res://assets/rewards/stallion_dash.png" id="2_rlm2j"]
+
+[resource]
+script = ExtResource("1_rlm2j")
+title = "Stallion Dash"
+type = 2
+texture = ExtResource("2_rlm2j")
+description = "Dash 3 tiles away, destroying everything on the path"
+rarity = 0
+prerequisites = Array[ExtResource("1_rlm2j")]([])
+tags = Array[int]([4])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

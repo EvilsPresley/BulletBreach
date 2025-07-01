@@ -1,0 +1,167 @@
+[gd_scene load_steps=16 format=3 uid="uid://editmd6njood"]
+
+[ext_resource type="Script" uid="uid://mula6anrwer8" path="res://scripts/ui/yes_no_modal.gd" id="1_mhxd8"]
+[ext_resource type="PackedScene" uid="uid://busi04l4ad4xr" path="res://scenes/ui/ui_title.tscn" id="2_e01cx"]
+[ext_resource type="PackedScene" uid="uid://8hnmp3o22adi" path="res://scenes/ui/ui_frame.tscn" id="3_a8eti"]
+[ext_resource type="LabelSettings" uid="uid://conx1sts6ijns" path="res://white_text_label_settings.tres" id="4_1mgti"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8xeqs"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hi02r"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5riq7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dcdvv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2yjdr"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h23bn"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yre8b"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_07sib"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b41j0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kvmui"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cvc1s"]
+
+[node name="YesNoModal" type="Control"]
+custom_minimum_size = Vector2(384, 128)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 384.0
+offset_bottom = 128.0
+script = ExtResource("1_mhxd8")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+z_index = -1
+z_as_relative = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.607843)
+
+[node name="Title" parent="." instance=ExtResource("2_e01cx")]
+layout_mode = 0
+offset_left = 12.0
+offset_top = -32.0
+offset_right = 75.0
+offset_bottom = 0.0
+text = "Rest in the coffin?"
+
+[node name="Background" parent="." instance=ExtResource("3_a8eti")]
+layout_mode = 1
+
+[node name="YesContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+offset_top = 88.0
+offset_right = 192.0
+offset_bottom = 128.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="YesButton" type="Button" parent="YesContainer"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_8xeqs")
+theme_override_styles/disabled_mirrored = SubResource("StyleBoxEmpty_hi02r")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_5riq7")
+theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxEmpty_dcdvv")
+theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_2yjdr")
+theme_override_styles/hover_mirrored = SubResource("StyleBoxEmpty_h23bn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_yre8b")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxEmpty_07sib")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_b41j0")
+theme_override_styles/normal_mirrored = SubResource("StyleBoxEmpty_kvmui")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_cvc1s")
+
+[node name="YesFrame" parent="YesContainer/YesButton" instance=ExtResource("3_a8eti")]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 182.0
+offset_bottom = 32.0
+
+[node name="Label" type="Label" parent="YesContainer/YesButton/YesFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "YES"
+label_settings = ExtResource("4_1mgti")
+horizontal_alignment = 1
+
+[node name="NoContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+offset_left = 192.0
+offset_top = 88.0
+offset_right = 384.0
+offset_bottom = 128.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="NoButton" type="Button" parent="NoContainer"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_8xeqs")
+theme_override_styles/disabled_mirrored = SubResource("StyleBoxEmpty_hi02r")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_5riq7")
+theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxEmpty_dcdvv")
+theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_2yjdr")
+theme_override_styles/hover_mirrored = SubResource("StyleBoxEmpty_h23bn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_yre8b")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxEmpty_07sib")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_b41j0")
+theme_override_styles/normal_mirrored = SubResource("StyleBoxEmpty_kvmui")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_cvc1s")
+
+[node name="NoFrame" parent="NoContainer/NoButton" instance=ExtResource("3_a8eti")]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 182.0
+offset_bottom = 32.0
+
+[node name="Label" type="Label" parent="NoContainer/NoButton/NoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "NO"
+label_settings = ExtResource("4_1mgti")
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 382.0
+offset_bottom = 92.0
+text = "Rest in this coffin for the day?
+You have XX turns remaining this night, before sunset."
+label_settings = ExtResource("4_1mgti")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[connection signal="pressed" from="YesContainer/YesButton" to="." method="_on_yes_button_pressed"]
+[connection signal="pressed" from="NoContainer/NoButton" to="." method="_on_no_button_pressed"]

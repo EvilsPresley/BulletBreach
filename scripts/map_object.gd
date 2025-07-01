@@ -1,14 +1,30 @@
 extends Control
 class_name MapObject
 
-@export var hp: int = 0
-@export var dmg: int = 0
-
 @onready var sprite: TextureRect = $Sprite
 @onready var highlight: TextureRect = $Highlight
+@export var destructible: bool = true
+@export var is_coffin: bool = false
+@export var is_portal: bool = false
 
 func get_map_position() -> Vector2i:
 	return Map.get_map_position(global_position)
 
 func set_map_position(pos: Vector2i) -> void:
 	global_position = Map.TILEMAP.to_global(Map.TILEMAP.map_to_local(pos))
+
+func destroy() -> void:
+	await Globals.wait_one_frame()
+	if destructible:
+		queue_free()
+
+func enable_highlight() -> void:
+	sprite.material.set_shader_parameter("outline_color", Colors.WHITE)
+	sprite.material.set_shader_parameter("outline_width", 2.0)
+
+func enable_red_highlight() -> void:
+	sprite.material.set_shader_parameter("outline_color", Colors.RED)
+	sprite.material.set_shader_parameter("outline_width", 2.0)
+
+func disable_highlight() -> void:
+	sprite.material.set_shader_parameter("outline_width", 0.0)

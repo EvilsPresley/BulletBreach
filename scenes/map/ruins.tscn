@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://yj5w7cw1dfnv"]
+
+[ext_resource type="PackedScene" uid="uid://bls0xrkohea3m" path="res://scenes/abstract/prop.tscn" id="1_0c5um"]
+[ext_resource type="Texture2D" uid="uid://dh773jwypjc7i" path="res://assets/map/ruins.png" id="2_08m1a"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="2_x0igb"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_04gyg"]
+resource_local_to_scene = true
+shader = ExtResource("2_x0igb")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Ruins" instance=ExtResource("1_0c5um")]
+destructible = false
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_04gyg")
+offset_bottom = 6.0
+texture = ExtResource("2_08m1a")

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://cdimhb0d576uy"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_gs86q"]
+[ext_resource type="Texture2D" uid="uid://buj6qwsx07jhj" path="res://assets/rewards/veteran.png" id="2_gs86q"]
+
+[resource]
+script = ExtResource("1_gs86q")
+title = "Type O Negative 1"
+type = 0
+texture = ExtResource("2_gs86q")
+description = "Earn XP 35% faster"
+rarity = 0
+prerequisites = Array[ExtResource("1_gs86q")]([])
+tags = Array[int]([4])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

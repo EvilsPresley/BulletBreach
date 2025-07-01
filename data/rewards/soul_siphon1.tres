@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://cub5nabd6ybis"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_yxsxy"]
+[ext_resource type="Texture2D" uid="uid://cx7hm2v7basqm" path="res://assets/rewards/soul_siphon.png" id="2_8qsbm"]
+
+[resource]
+script = ExtResource("1_yxsxy")
+title = "Soul Siphon 1"
+type = 0
+texture = ExtResource("2_8qsbm")
+description = "Allows harvesting blood 1 tile away orthogonally"
+rarity = 0
+prerequisites = Array[ExtResource("1_yxsxy")]([])
+tags = Array[int]([5])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

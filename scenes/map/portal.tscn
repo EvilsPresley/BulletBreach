@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=3 uid="uid://dg6lq7ue72c5w"]
+
+[ext_resource type="PackedScene" uid="uid://bls0xrkohea3m" path="res://scenes/abstract/prop.tscn" id="1_hqgya"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="2_qyela"]
+[ext_resource type="Texture2D" uid="uid://tphql6j58wrv" path="res://assets/player/portal_1.png" id="3_qyela"]
+[ext_resource type="Script" uid="uid://diuc45bddgtmh" path="res://scripts/portal_sprite.gd" id="4_sq7h6"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cp4ur"]
+resource_local_to_scene = true
+shader = ExtResource("2_qyela")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Portal" instance=ExtResource("1_hqgya")]
+destructible = false
+is_portal = true
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_cp4ur")
+offset_left = -24.0
+offset_top = -29.0
+offset_right = 24.0
+offset_bottom = 19.0
+texture = ExtResource("3_qyela")
+script = ExtResource("4_sq7h6")

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bj4uoxjwntt0i"]
+
+[ext_resource type="Texture2D" uid="uid://dqxevu5bgcjx7" path="res://assets/ennemies/flame.png" id="2_33ilm"]
+
+[node name="Flame" type="TextureRect"]
+offset_left = -12.0
+offset_top = -10.0
+offset_right = 12.0
+offset_bottom = 14.0
+texture = ExtResource("2_33ilm")

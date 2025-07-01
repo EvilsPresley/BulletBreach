@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://c0qph4a7y2wit"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_4acic"]
+[ext_resource type="Texture2D" uid="uid://dihrhm70d7ih7" path="res://assets/rewards/versatile.png" id="2_4acic"]
+
+[resource]
+script = ExtResource("1_4acic")
+title = "Versatile 1"
+type = 0
+texture = ExtResource("2_4acic")
+description = "Draw one more upgrade on level up"
+rarity = 2
+prerequisites = Array[ExtResource("1_4acic")]([])
+tags = Array[int]([])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

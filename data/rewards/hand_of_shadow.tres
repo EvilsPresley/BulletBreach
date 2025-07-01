@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://kj6kx03arhwu"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_vpxqp"]
+[ext_resource type="Texture2D" uid="uid://dlh7w4vwvcbc4" path="res://assets/rewards/hand_of_shadows.png" id="2_vpxqp"]
+
+[resource]
+script = ExtResource("1_vpxqp")
+title = "Hand Of Shadow"
+type = 0
+texture = ExtResource("2_vpxqp")
+description = "On level up, if you pick a shadow upgrade, immediately get another free upgrade"
+rarity = 1
+prerequisites = Array[ExtResource("1_vpxqp")]([])
+tags = Array[int]([])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

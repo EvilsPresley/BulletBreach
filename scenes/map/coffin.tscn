@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://bhnc3i84we46d"]
+
+[ext_resource type="PackedScene" uid="uid://bls0xrkohea3m" path="res://scenes/abstract/prop.tscn" id="1_dodh6"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="2_0k6ql"]
+[ext_resource type="Texture2D" uid="uid://b5kmk5q4wdlfh" path="res://assets/map/coffin.png" id="3_0k6ql"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cp4ur"]
+resource_local_to_scene = true
+shader = ExtResource("2_0k6ql")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Coffin" instance=ExtResource("1_dodh6")]
+destructible = false
+is_coffin = true
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_cp4ur")
+offset_top = -21.0
+offset_bottom = 15.0
+texture = ExtResource("3_0k6ql")

@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://7yxy5mwg3udo"]
+
+[ext_resource type="Script" uid="uid://v3agyv3v5trq" path="res://scripts/scene_loader.gd" id="1_jtpn2"]
+[ext_resource type="Texture2D" uid="uid://bon4v1gpv8q10" path="res://assets/ui/loading_circle.png" id="2_m85m7"]
+
+[node name="SceneLoader" type="CanvasLayer"]
+script = ExtResource("1_jtpn2")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LoadingCircle" type="TextureRect" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+pivot_offset = Vector2(20, 20)
+texture = ExtResource("2_m85m7")

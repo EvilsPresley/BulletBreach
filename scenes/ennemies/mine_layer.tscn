@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://btfqwrsl5rxp1"]
+
+[ext_resource type="PackedScene" uid="uid://cenoy8v38mh1q" path="res://scenes/abstract/ennemy.tscn" id="1_ios4p"]
+[ext_resource type="Script" uid="uid://cs516nhos6kr3" path="res://scripts/ennemies/mine_layer.gd" id="2_felsq"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_6ng8k"]
+[ext_resource type="Texture2D" uid="uid://evsyusmtbcgt" path="res://assets/ennemies/tracker.png" id="4_6ng8k"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mxs7y"]
+resource_local_to_scene = true
+shader = ExtResource("3_6ng8k")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="MineLayer" instance=ExtResource("1_ios4p")]
+script = ExtResource("2_felsq")
+reload_time = 2
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_mxs7y")
+texture = ExtResource("4_6ng8k")

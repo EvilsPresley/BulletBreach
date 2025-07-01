@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://pmipqdwlydma"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_un40o"]
+[ext_resource type="Texture2D" uid="uid://be3rsq3fk71nc" path="res://assets/rewards/night_bolt.png" id="2_lewyf"]
+[ext_resource type="Resource" uid="uid://b32kuaxulvwoe" path="res://data/rewards/night_bolt1.tres" id="2_qtkn0"]
+
+[resource]
+script = ExtResource("1_un40o")
+title = "Night Bolt 2"
+type = 0
+texture = ExtResource("2_lewyf")
+description = "Night bolt now sends 3 bolts at once"
+rarity = 0
+prerequisites = Array[ExtResource("1_un40o")]([ExtResource("2_qtkn0")])
+tags = Array[int]([2])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

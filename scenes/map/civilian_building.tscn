@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=3 uid="uid://gfff1sdofy78"]
+
+[ext_resource type="PackedScene" uid="uid://84xahnip7u8" path="res://scenes/abstract/building.tscn" id="1_qktg5"]
+[ext_resource type="Script" uid="uid://bnimewsu28e58" path="res://scripts/civilian_building.gd" id="2_027r7"]
+[ext_resource type="PackedScene" uid="uid://yj5w7cw1dfnv" path="res://scenes/map/ruins.tscn" id="3_ly72o"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="4_y11iu"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ourjj"]
+resource_local_to_scene = true
+shader = ExtResource("4_y11iu")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="CivilianBuilding" instance=ExtResource("1_qktg5")]
+script = ExtResource("2_027r7")
+destroyed_scene = ExtResource("3_ly72o")
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_ourjj")

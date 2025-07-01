@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://dgdro3yj6jovq"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_fonu0"]
+[ext_resource type="Resource" uid="uid://0exljjvlyj2e" path="res://data/rewards/time_travel.tres" id="2_4b85g"]
+[ext_resource type="Texture2D" uid="uid://cxpetoyxdvmkp" path="res://assets/rewards/haste.png" id="3_0h880"]
+
+[resource]
+script = ExtResource("1_fonu0")
+title = "Haste 1"
+type = 0
+texture = ExtResource("3_0h880")
+description = "Time Travel makes other skills recuperate faster by 1 turn."
+rarity = 0
+prerequisites = Array[ExtResource("1_fonu0")]([ExtResource("2_4b85g")])
+tags = Array[int]([2])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

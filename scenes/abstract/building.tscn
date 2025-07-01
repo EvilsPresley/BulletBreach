@@ -1,16 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://84xahnip7u8"]
+[gd_scene load_steps=5 format=3 uid="uid://84xahnip7u8"]
 
 [ext_resource type="PackedScene" uid="uid://dyqq34kv4qpot" path="res://scenes/abstract/map_object.tscn" id="1_n8bkc"]
 [ext_resource type="Script" uid="uid://44u7h58xixww" path="res://scripts/building.gd" id="2_uvy8r"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_l402d"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nb74j"]
+resource_local_to_scene = true
+shader = ExtResource("3_l402d")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="Building" instance=ExtResource("1_n8bkc")]
 script = ExtResource("2_uvy8r")
-can_player_move = false
-can_ennemy_move = false
-can_bullet_destroy = false
-civilians = false
-skills = Array[int]([])
 destroyed_scene = null
 
-[node name="Highlight" parent="." index="1"]
-visible = false
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_nb74j")
+offset_top = -47.0
+offset_bottom = 15.0

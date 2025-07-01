@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://boj48puhe4yqx"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_ctsah"]
+[ext_resource type="Texture2D" uid="uid://bxktyt5660i41" path="res://assets/rewards/moon_orb.png" id="2_ctsah"]
+
+[resource]
+script = ExtResource("1_ctsah")
+title = "Moon Orb"
+type = 0
+texture = ExtResource("2_ctsah")
+description = "Protects from church proximity and dawn exhaustion."
+rarity = 0
+prerequisites = Array[ExtResource("1_ctsah")]([])
+tags = Array[int]([2])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://b6iy56qv2n4o4"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_yxdp2"]
+[ext_resource type="Texture2D" uid="uid://b1e6n471jr0mr" path="res://assets/rewards/teleport.png" id="2_yxdp2"]
+
+[resource]
+script = ExtResource("1_yxdp2")
+title = "Teleportation"
+type = 2
+texture = ExtResource("2_yxdp2")
+description = "Teleports 2 tiles away"
+rarity = 0
+prerequisites = Array[ExtResource("1_yxdp2")]([])
+tags = Array[int]([2])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

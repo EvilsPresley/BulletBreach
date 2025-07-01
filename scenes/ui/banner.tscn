@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3 uid="uid://81p2tt4s8fte"]
+
+[ext_resource type="Script" uid="uid://caj5sr3ongyx4" path="res://scripts/ui/banner.gd" id="1_ncrei"]
+[ext_resource type="PackedScene" uid="uid://8hnmp3o22adi" path="res://scenes/ui/ui_frame.tscn" id="3_4k2vn"]
+[ext_resource type="Texture2D" uid="uid://4fraiodv48br" path="res://assets/portraits/vampire.png" id="5_0bqhb"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="5_avm8l"]
+[ext_resource type="LabelSettings" uid="uid://conx1sts6ijns" path="res://white_text_label_settings.tres" id="6_rqkby"]
+[ext_resource type="Texture2D" uid="uid://20o7ks2pul5f" path="res://assets/ui/mouse1.png" id="7_c7xeb"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_01f3e"]
+shader = ExtResource("5_avm8l")
+shader_parameter/outline_width = 1.0
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Banner" type="Control"]
+custom_minimum_size = Vector2(1024, 96)
+layout_mode = 3
+anchors_preset = 0
+offset_bottom = 96.0
+script = ExtResource("1_ncrei")
+
+[node name="Background" parent="." instance=ExtResource("3_4k2vn")]
+layout_mode = 1
+
+[node name="Label" type="Label" parent="."]
+clip_contents = true
+layout_mode = 0
+offset_left = 152.0
+offset_top = 2.0
+offset_right = 872.0
+offset_bottom = 94.0
+text = "Lorem Ipsum
+Lorem Ipsum
+Lorem Ipsum"
+label_settings = ExtResource("6_rqkby")
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="MouseClick" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 960.0
+offset_top = 56.0
+offset_right = 976.0
+offset_bottom = 72.0
+scale = Vector2(2, 2)
+texture = ExtResource("7_c7xeb")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="Portrait" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_01f3e")
+layout_mode = 0
+offset_left = 448.0
+offset_top = -112.0
+offset_right = 576.0
+texture = ExtResource("5_0bqhb")
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

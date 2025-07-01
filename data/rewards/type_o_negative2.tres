@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://n5rh44ai5ct1"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_56lxw"]
+[ext_resource type="Resource" uid="uid://cdimhb0d576uy" path="res://data/rewards/type_o_negative1.tres" id="2_8542g"]
+[ext_resource type="Texture2D" uid="uid://buj6qwsx07jhj" path="res://assets/rewards/veteran.png" id="3_e6y67"]
+
+[resource]
+script = ExtResource("1_56lxw")
+title = "Type O Negative 2"
+type = 0
+texture = ExtResource("3_e6y67")
+description = "Earn XP 35% faster"
+rarity = 0
+prerequisites = Array[ExtResource("1_56lxw")]([ExtResource("2_8542g")])
+tags = Array[int]([4])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

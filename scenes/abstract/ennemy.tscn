@@ -1,30 +1,37 @@
-[gd_scene load_steps=5 format=3 uid="uid://cenoy8v38mh1q"]
+[gd_scene load_steps=7 format=3 uid="uid://cenoy8v38mh1q"]
 
 [ext_resource type="PackedScene" uid="uid://dr8e7yx1bf0uq" path="res://scenes/abstract/mobile_object.tscn" id="1_dowks"]
-[ext_resource type="Script" uid="uid://005egip7vdgc" path="res://scripts/ennemy.gd" id="2_t1tc3"]
-[ext_resource type="Texture2D" uid="uid://dgkhaieu1fkab" path="res://assets/red_tank_E.png" id="3_gafg8"]
-[ext_resource type="Texture2D" uid="uid://bhgdyya8fkoib" path="res://assets/fire.png" id="4_n4lfa"]
+[ext_resource type="Script" uid="uid://005egip7vdgc" path="res://scripts/ennemies/ennemy.gd" id="2_t1tc3"]
+[ext_resource type="Texture2D" uid="uid://0ib2246iodt8" path="res://assets/ennemies/archer_1.png" id="3_2rlf4"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_k75lf"]
+[ext_resource type="LabelSettings" uid="uid://conx1sts6ijns" path="res://white_text_label_settings.tres" id="5_k75lf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2rlf4"]
+resource_local_to_scene = true
+shader = ExtResource("3_k75lf")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="Ennemy" instance=ExtResource("1_dowks")]
 script = ExtResource("2_t1tc3")
-shoot_range = 5
 reload_time = 0
 
 [node name="Sprite" parent="." index="0"]
-offset_left = -12.0
-offset_top = -16.0
-offset_right = 13.0
-offset_bottom = 9.0
-texture = ExtResource("3_gafg8")
+material = SubResource("ShaderMaterial_2rlf4")
+texture = ExtResource("3_2rlf4")
 
-[node name="Fire" type="TextureRect" parent="." index="2"]
+[node name="Order" type="Label" parent="Sprite" index="0"]
 visible = false
-layout_mode = 0
-offset_left = -16.0
-offset_top = -24.0
-offset_right = 16.0
-offset_bottom = 8.0
-texture = ExtResource("4_n4lfa")
+self_modulate = Color(0, 0.879648, 0.712896, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+label_settings = ExtResource("5_k75lf")
 
-[node name="Plan" type="Control" parent="." index="3"]
+[node name="Plan" type="Control" parent="." index="2"]
 anchors_preset = 0

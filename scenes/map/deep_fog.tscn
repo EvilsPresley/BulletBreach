@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://bm0scwflfyyd3"]
+
+[ext_resource type="PackedScene" uid="uid://dyqq34kv4qpot" path="res://scenes/abstract/map_object.tscn" id="1_k1nxp"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="2_govfj"]
+[ext_resource type="Texture2D" uid="uid://cx600hf6rot4x" path="res://assets/map/deep_fog.png" id="2_lo40b"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_k0uuo"]
+resource_local_to_scene = true
+shader = ExtResource("2_govfj")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="DeepFog" instance=ExtResource("1_k1nxp")]
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_k0uuo")
+offset_left = -20.0
+offset_top = -16.0
+offset_right = 20.0
+offset_bottom = 15.0
+texture = ExtResource("2_lo40b")

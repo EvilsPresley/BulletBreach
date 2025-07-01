@@ -1,305 +1,707 @@
 extends MobileObject
 class_name Player
 
-var input_direction: Vector2 = Vector2.ZERO
-var can_act: bool = false
+var moving: bool = false
+var was_special_move: bool = false
 
-var blink_range: int = 2
 var previous_positions: Array[Vector2i] = []
-var jump: int = 0
-var max_jump: int = 1
-var flight_height: int = 20
+var fly_duration: int = 0
+var flight_height: int = 6
+var experience: int = 0
+var sanguine_pool_use: int = 0
 
-@onready var MOVE_BUTTONS: MoveButtons = $"../../CanvasLayer/MoveButtons"
-@onready var CAMERA: Camera2D = $Sprite/Camera2D
+@onready var MOVE_BUTTONS: MoveButtons = $"../../Ui/MoveButtons"
 @onready var ORACLE: Control = $Oracle
-@onready var GLOBAL_OVERLAY: ColorRect = $"../../CanvasLayer/GlobalOverlay"
+@onready var GLOBAL_OVERLAY: ColorRect = $"../../Ui/GlobalOverlay"
+@onready var LIGHT_FOG: TileMapLayer = $LightFog
+@onready var MAIN: Main = $"../.."
+@onready var CAMERA: Camera2D = $Sprite/Camera2D
 
 signal turn_complete
+signal blood_harvested
+signal church_exhausted
+signal sun_exhausted
+signal enter_coffin
+
+func intro() -> void:
+	sprite.position = Vector2(25, -96)
+	await Globals.wait(0.5)
+	var tween:= create_tween()
+	tween.tween_property(
+		sprite,
+		"position",
+		Vector2(-24, -38),
+		1.0
+	)
+	await tween.finished
 
 func _process(_delta) -> void:
-	for child in ORACLE.get_children():
-		child.queue_free()
-	if can_act:
-		for i: int in Map.dimensions.x:
-			for j: int in Map.dimensions.y:
-				update_orcale(Vector2i(i, j))
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		var mouse_position = Map.get_map_position(get_global_mouse_position())
-		match Globals.move_mode:
-			Enums.move_mode.WALK:
-				if can_walk_to(mouse_position):
-					walk_to(mouse_position)
-			Enums.move_mode.BLINK:
-				if can_blink_to(mouse_position):
-					blink_to(mouse_position)
-			Enums.move_mode.CHARGE:
-				if can_charge_to(mouse_position):
-					charge_to(mouse_position)
-			Enums.move_mode.TIME_TRAVEL:
-				if can_time_travel_to(mouse_position):
-					time_travel_to(mouse_position)
-			Enums.move_mode.JUMP:
-				if can_jump_to(mouse_position):
-					jump_to(mouse_position)
-			_:
-				push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
+	if _can_act():
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			var mouse_position = Map.get_map_position(get_global_mouse_position())
+			if fly_duration > 0:
+				if can_fly_to(mouse_position):
+					await _move_start(mouse_position)
+					await fly_to(mouse_position)
+			match Globals.move_mode:
+				Enums.move_mode.WALK:
+					if can_walk_to(mouse_position):
+						await _move_start(mouse_position)
+						await walk_to(mouse_position)
+				Enums.move_mode.TELEPORT:
+					if can_teleport_to(mouse_position):
+						await _move_start(mouse_position)
+						await teleport_to(mouse_position)
+				Enums.move_mode.TIME_TRAVEL:
+					if can_time_travel_to(mouse_position):
+						await _move_start(mouse_position)
+						await time_travel_to(mouse_position)
+				Enums.move_mode.FLY:
+					if can_fly_to(mouse_position):
+						await _move_start(mouse_position)
+						await take_off()
+						await fly_to(mouse_position)
+				Enums.move_mode.WEREWOLF:
+					if can_werewolf_to(mouse_position):
+						await _move_start(mouse_position)
+						await werewolf_to(mouse_position)
+				Enums.move_mode.DASH:
+					if can_dash_to(mouse_position):
+						await _move_start(mouse_position)
+						await dash_to(mouse_position)
+				_:
+					push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
+
+func _can_act() -> bool:
+	return !Globals.calculating_turn and !MAIN.is_ui_blocking() and !moving
+
+func _move_start(target: Vector2i) -> void:
+	Map.re_activate_visible_ennemies(target)
+	moving = true
+	update_oracle()
+	MOVE_BUTTONS.apply_move(fly_duration > 0)
+	await _harvest_blood(target)
+
+func can_werewolf_to(target: Vector2i) -> bool:
+	var move_dif: Vector2i = get_map_position() - target
+	var werewolf_range: int = PlayerRewards.get_werewolf_range()
+	if (abs(move_dif.x) <= werewolf_range or abs(move_dif.y) <= werewolf_range) \
+	and max(abs(move_dif.x), abs(move_dif.y)) <= werewolf_range:
+		return !Map.is_under_fog(target) \
+		and (Map.BUILDINGS.get_children().filter(
+			func(b) -> bool:
+				return b.get_map_position() == target and b is CivilianBuilding
+		).size() == 1 \
+		or Map.CIVILIANS.get_children().filter(
+			func(c) -> bool:return c.get_map_position() == target).size() == 1 \
+		or (PlayerRewards.has_reward("Demon Wolf") \
+			and Map.ENNEMIES.get_children().filter(
+				func(e) -> bool: return e.get_map_position() == target).size() == 1))
+	else:
+		return false
+
+func werewolf_to(target: Vector2i) -> void:
+	direction = Map.vector_to_cardinal(target - get_map_position())
+	sprite.texture = preload("res://assets/player/werewolf.png")
+	highlight.global_position = Map.TILEMAP.map_to_local(target) + highlight_origin
+	var buildings: Array = Map.BUILDINGS.get_children().filter(
+		func(b) -> bool:
+			return b.get_map_position() == target and b is CivilianBuilding
+	)
+	var ennemies: Array = Map.ENNEMIES.get_children().filter(
+		func(b) -> bool:
+			return b.get_map_position() == target
+	)
+	var claw: TextureRect = TextureRect.new()
+	claw.texture = preload("res://assets/player/werewolf_claw.png")
+	add_child(claw)
+	claw.global_position = Map.get_global_position(target) - claw.size * .5
+	var claw_tween := create_tween()
+	claw_tween.tween_property(
+		claw, 
+		"modulate", 
+		Colors.RED, 
+		Globals.get_anim_duration() * .5)
+	await claw_tween.finished
+	claw.queue_free()
+	if buildings.size() > 0:
+		buildings[0].instant_destroy()
+		await _harvest_blood(target)
+	if ennemies.size() > 0:
+		ennemies[0].destroy(false)
+	
+	await CurveTween.tween_curve_path(
+		sprite,
+		highlight.global_position,
+		Globals.get_anim_duration()
+	)
+	sprite.texture = preload("res://assets/player/vampire.png")
+	move_end()
+	_move_end()
 
 func can_time_travel_to(target: Vector2i) -> bool:
-	return Map.can_move(target) and previous_positions.find(target) >= 0
+	return Map.can_move(target) \
+	and previous_positions.find(target) >= 0 \
+	and !Map.is_under_fog(target)
 
 func time_travel_to(target: Vector2i) -> void:
-	if can_act:
-		can_act = false
-		move_tween = create_tween()
-		move_tween.tween_property(
-			GLOBAL_OVERLAY, 
-			"color", 
-			Color(0.411765, 0.411765, 0.411765, 0.66),
-			move_duration)
-		move_tween.tween_property(
-			self,
-			"global_position",
-			Map.get_global_position(target),
-			move_duration * 2)
-		move_tween.tween_property(
-			GLOBAL_OVERLAY, 
-			"color", 
-			Color.TRANSPARENT,
-			move_duration)
-		await move_tween.finished
-		player_move_end()
+	MOVE_BUTTONS.haste(PlayerRewards.has_reward("Haste"))
+	move_tween = create_tween()
+	move_tween.tween_property(
+		GLOBAL_OVERLAY, 
+		"color", 
+		Color(0.411765, 0.411765, 0.411765, 0.66),
+		Globals.get_anim_duration())
+	move_tween.tween_property(
+		self,
+		"global_position",
+		Map.get_global_position(target),
+		Globals.get_anim_duration())
+	move_tween.tween_property(
+		GLOBAL_OVERLAY, 
+		"color", 
+		Color.TRANSPARENT,
+		Globals.get_anim_duration())
+	await move_tween.finished
+	for ennemy: Ennemy in Map.ENNEMIES.get_children():
+		ennemy.confusion()
+	await Globals.wait(Globals.get_anim_duration())
+	_move_end()
 
 func can_walk_to(target: Vector2i) -> bool:
-	return Map.cardinals.find(get_map_position() - target) > - 1 \
-		and Map.can_move(target)
+	var pos_dif: Vector2i = target - get_map_position()
+	if Map.get_orthogonal_distance(get_map_position(), target) != 1:
+		# Trying to walk more or less than 1 tile
+		return false
+	# When walking diagonaly, verify that both sides are not blocking
+	if (pos_dif == Map.N and !Map.can_move(target + Map.SE) and !Map.can_move(target + Map.SW)) \
+	or (pos_dif == Map.S and !Map.can_move(target + Map.NE) and !Map.can_move(target + Map.NW)) \
+	or (pos_dif == Map.E and !Map.can_move(target + Map.NW) and !Map.can_move(target + Map.SW)) \
+	or (pos_dif == Map.W and !Map.can_move(target + Map.NE) and !Map.can_move(target + Map.SE)):
+		return false
+	return Map.can_move(target)
 
 func walk_to(target: Vector2i) -> void:
-	if can_act:
-		can_act = false
-		direction = target - get_map_position()
-		await move_one_tile()
-		player_move_end()
+	direction = target - get_map_position()
+	await move_one_tile()
+	_move_end(false)
 
-func can_jump_to(target: Vector2i) -> bool:
-	return Map.get_distance(get_map_position(), target) == 1 \
-		and Map.can_move(target, [Map.BUILDINGS])
+func can_fly_to(target: Vector2i) -> bool:
+	return Map.get_orthogonal_distance(get_map_position(), target) == 1 \
+		and Map.can_move(target)
 
-func jump_to(target: Vector2i) -> void:
-	if can_act:
-		can_act = false
-		jump = max_jump
-		direction = target - get_map_position()
-		await _turn_to_plane()
-		await move_one_tile()
-		player_move_end()
+func fly_to(target: Vector2i) -> void:
+	direction = target - get_map_position()
+	var previous_tile: Vector2i = get_map_position()
+	await move_one_tile()
+	var candidate_poison_tiles: Array[Vector2i] = Map.cardinals.duplicate()
+	candidate_poison_tiles.remove_at(candidate_poison_tiles.find(Map.get_opposite_vector(direction)))
+	candidate_poison_tiles.shuffle()
+	for i: int in PlayerRewards.has_reward("Poison Shells") * 2:
+		Map.add_poison(get_map_position() + candidate_poison_tiles[i])
+	await Map.add_poison(previous_tile)
+	_move_end()
 
-func _turn_to_plane() -> void:
-	sprite.texture = preload("res://assets/plane.png")
+func take_off() -> void:
+	fly_duration = PlayerRewards.get_fly_duration()
+	sprite.texture = preload("res://assets/player/bat.png")
 	sprite_origin.y -= flight_height
 	var tween := create_tween()
 	tween.tween_property(
 		sprite, 
 		"position:y", 
 		sprite_origin.y,
-		move_duration * 2)
+		Globals.get_anim_duration())
 	await tween.finished
 
-func _land_as_mech() -> void:
-	sprite.texture = preload("res://assets/mech_E.png")
+func _land() -> void:
+	sprite.texture = preload("res://assets/player/vampire.png")
 	sprite_origin.y += flight_height
 	var tween := create_tween()
 	tween.tween_property(
 		sprite, 
 		"position:y", 
 		sprite_origin.y,
-		move_duration * 2)
+		Globals.get_anim_duration() * 2)
 	await tween.finished
 	for ennemy: Ennemy in Map.ENNEMIES.get_children():
 		if ennemy.get_map_position() == get_map_position():
-			ennemy.destroy()
+			ennemy.destroy(false)
 
-func can_blink_to(target: Vector2i) -> bool:
+func can_dash_to(target: Vector2i) -> bool:
+	var move_dif: Vector2i = get_map_position() - target
+	var dash_range: Array[int] = PlayerRewards.get_dash_range()
+	if move_dif == Vector2i.ZERO:
+		return false
+	if (move_dif.x != 0 and dash_range.find(abs(move_dif.x)) < 0) \
+	or (move_dif.y != 0 and dash_range.find(abs(move_dif.y)) < 0):
+		return false
+	var move_dir: Vector2i = Map.vector_to_cardinal(-move_dif)
+	if Map.cardinals.find(move_dir) < 0:
+		return false
+	for i: int in dash_range.max():
+		if !Map.can_move(get_map_position() + move_dir * (i + 1), []):
+			return false
+		for building:Building in Map.BUILDINGS.get_children():
+			if building.get_map_position() == get_map_position() + move_dir * (i + 1) \
+			and building.destroyed_scene == null:
+				return false
+	return true
+	
+func dash_to(target: Vector2i) -> void:
+	var move_dir: Vector2i = Map.vector_to_cardinal(target - get_map_position())
+	for i: int in PlayerRewards.get_dash_range().max():
+		Map.destroy_tile(get_map_position() + move_dir * (i + 1), Enums.destruction_type.EXPLOSION)
+		if get_map_position() + move_dir * (i + 1) == target:
+			break
+	await Globals.wait(Globals.get_anim_duration())
+	highlight.global_position = Map.TILEMAP.map_to_local(target) + highlight_origin
+	move_tween = create_tween()
+	move_tween.tween_property(
+		sprite, 
+		"global_position", 
+		highlight.global_position - highlight_origin + sprite_origin, 
+		Globals.get_anim_duration() * 1.2)
+	move_tween.tween_callback(move_end)
+	await move_tween.finished
+	if PlayerRewards.has_reward("Blood Dash"):
+		await _trigger_blood_nova(max(1, PlayerRewards.has_reward("Blood Nova")))
+	_move_end()
+	
+func can_teleport_to(target: Vector2i) -> bool:
 	if !Map.can_move(target):
 		return false
 	var move_dif: Vector2i = get_map_position() - target
-	if (abs(move_dif.x) == blink_range or abs(move_dif.y) == blink_range) \
-	and max(abs(move_dif.x), abs(move_dif.y)) == blink_range:
+	var teleport_range: int = PlayerRewards.get_teleport_range()
+	if move_dif == Vector2i.ZERO:
+		return false
+	if (abs(move_dif.x) <= teleport_range or abs(move_dif.y) <= teleport_range) \
+	and max(abs(move_dif.x), abs(move_dif.y)) <= teleport_range:
 		return true
 	return false
 
-func blink_to(target: Vector2i) -> void:
-	if can_act:
-		can_act = false
-		highlight.global_position = Map.TILEMAP.map_to_local(target) + highlight_origin
-		move_tween = create_tween()
-		move_tween.tween_property(
-			sprite, 
-			"modulate", 
-			Color(0., 2., 2., 0.),
-			move_duration * 2)
-		move_tween.tween_callback(move_end)
-		await move_tween.finished
-		move_tween = create_tween()
-		move_tween.tween_property(
-			sprite, 
-			"modulate", 
-			Color.WHITE,
-			move_duration * 2)
-		player_move_end()
+func teleport_to(target: Vector2i) -> void:
+	var from_circle: TextureRect = TextureRect.new()
+	var to_circle: TextureRect = TextureRect.new()
+	from_circle.texture = preload("res://assets/player/teleport_circle.png")
+	to_circle.texture = preload("res://assets/player/teleport_circle.png")
+	from_circle.modulate.a = 0
+	to_circle.modulate.a = 0
+	from_circle.show_behind_parent = true
+	to_circle.show_behind_parent = true
+	highlight.global_position = Map.TILEMAP.map_to_local(target) + highlight_origin
+	highlight.visible = true
+	highlight.add_child(from_circle)
+	highlight.add_child(to_circle)
+	from_circle.global_position = global_position - from_circle.size * .5
+	to_circle.global_position = Map.TILEMAP.map_to_local(target) - to_circle.size * .5
+	move_tween = create_tween().set_parallel(true)
+	move_tween.tween_property(
+		from_circle, 
+		"modulate:a", 
+		1,
+		Globals.get_anim_duration())
+	move_tween.tween_property(
+		to_circle, 
+		"modulate:a", 
+		1,
+		Globals.get_anim_duration())
+	await move_tween.finished
+	move_tween = create_tween()
+	move_tween.tween_property(
+		sprite, 
+		"modulate", 
+		Color(0., 2., 2., 0.),
+		Globals.get_anim_duration() * 2)
+	if PlayerRewards.has_reward("Portal") > 0:
+		move_tween.tween_callback(create_portals.bind(target))
+	move_tween.tween_callback(move_end)
+	await move_tween.finished
+	move_tween = create_tween()
+	move_tween.tween_property(
+		sprite, 
+		"modulate", 
+		Color.WHITE,
+		Globals.get_anim_duration() * 2)
+	await move_tween.finished
+	move_tween = create_tween().set_parallel(true)
+	move_tween.tween_property(
+		from_circle, 
+		"modulate:a", 
+		0,
+		Globals.get_anim_duration())
+	move_tween.tween_property(
+		to_circle, 
+		"modulate:a", 
+		0,
+		Globals.get_anim_duration())
+	await move_tween.finished
+	from_circle.queue_free()
+	to_circle.queue_free()
+	highlight.visible = false
+	_move_end()
 
-func can_charge_to(tile: Vector2i) -> bool:
-	if Map.TILEMAP.get_cell_source_id(tile) < 0:
-		return false
-	var target_is_aligned: bool = false
-	var pos_dif: Vector2i = tile - get_map_position()
-	for i in max(Map.dimensions.x, Map.dimensions.y):
-		for cardinal: Vector2i in Map.cardinals:
-			if pos_dif == (i + 1) * cardinal:
-				target_is_aligned = true
-	if !target_is_aligned:
-		return false
-	var target_direction: Vector2i = Map.vector_to_cardinal(pos_dif)
-	for i in max(Map.dimensions.x, Map.dimensions.y):
-		if tile == get_map_position() + (i + 1) * target_direction:
-			return true
-		for building: Building in Map.BUILDINGS.get_children():
-			if building.get_map_position() == get_map_position() + (i + 1) * target_direction:
-				return false
-		for ennemy: Ennemy in Map.ENNEMIES.get_children():
-			if ennemy.get_map_position() == get_map_position() + (i + 1) * target_direction:
-				return false
-	return false
+func create_portals(target: Vector2i) -> void:
+	for prop: Prop in Map.PROPS.get_children():
+		if prop.is_portal:
+			prop.queue_free()
+	var from_portal: Prop = preload("res://scenes/map/portal.tscn").instantiate()
+	var to_portal: Prop = preload("res://scenes/map/portal.tscn").instantiate()
+	from_portal.global_position = Map.get_global_position(get_map_position()) - from_portal.size * .5
+	to_portal.global_position = Map.get_global_position(target) - from_portal.size * .5
+	Map.PROPS.add_child(from_portal)
+	Map.PROPS.add_child(to_portal)
 
-func charge_to(target: Vector2i) -> void:
-	if can_act:
-		can_act = false
-		move_duration /= 3.
-		direction = Map.vector_to_cardinal(target - get_map_position())
-		while Map.can_move(get_map_position() + direction):
-			await move_one_tile()
-		for building: Building in Map.BUILDINGS.get_children():
-			if building.get_map_position() == get_map_position() + direction \
-			and building.destroyed_scene != null:
-				building.destroy()
-				await Globals.wait(move_duration)
-		for ennemy: Ennemy in Map.ENNEMIES.get_children():
-			if ennemy.get_map_position() == get_map_position() + direction:
-				ennemy.destroy()
-				await Globals.wait(move_duration * 2)
-		move_duration *= 3.
-		player_move_end()
+func portal_teleport(target: Vector2i) -> void:
+	highlight.global_position = Map.TILEMAP.map_to_local(target) + highlight_origin
+	move_tween = create_tween()
+	move_tween.tween_property(
+		sprite, 
+		"modulate", 
+		Color(0., 2., 2., 0.),
+		Globals.get_anim_duration() * 2)
+	move_tween.tween_callback(move_end)
+	await move_tween.finished
+	move_tween = create_tween()
+	move_tween.tween_property(
+		sprite, 
+		"modulate", 
+		Color.WHITE,
+		Globals.get_anim_duration() * 2)
+	await move_tween.finished
 
-func player_move_end() -> void:
-	await rescue()
+func _move_end(is_special_move: bool = true) -> void:
 	add_previous_position()
-	MOVE_BUTTONS.apply_move()
+	if !is_special_move:
+		var walked_into_portal: bool = false
+		var target_portal: Vector2i
+		for prop: Prop in Map.PROPS.get_children():
+			if prop.is_portal:
+				if prop.get_map_position() == get_map_position():
+					walked_into_portal = true
+				if prop.get_map_position() != get_map_position():
+					target_portal = prop.get_map_position()
+		if walked_into_portal:
+			await portal_teleport(target_portal)
+			add_previous_position()
+	if was_special_move and !is_special_move:
+		await _trigger_night_bolt(direction)
+		await _trigger_vengeance(direction)
+		await _trigger_blood_nova(PlayerRewards.has_reward("Blood Nova"))
+	was_special_move = is_special_move
+	await _harvest_blood_around()
+	disable_highlight()
+	Map.update_fog()
 	_reveal_land_mines()
+	sanguine_pool_use = 0
+	moving = false
 	turn_complete.emit()
 
+func _harvest_blood_around() -> void:
+	var target_dirs: Array[Vector2i] = []
+	match PlayerRewards.has_reward("Soul Siphon"):
+		0: return
+		1:
+			target_dirs.append_array([
+				Map.NE,
+				Map.SE,
+				Map.NW,
+				Map.SW,
+			])
+		2: target_dirs = Map.cardinals
+		3:
+			target_dirs = Map.cardinals.duplicate()
+			target_dirs.append_array([
+				Map.NE * 2,
+				Map.SE * 2,
+				Map.NW * 2,
+				Map.SW * 2
+			])
+		_:
+			push_error("Soul Siphon upgrade has unexpected value")
+	for dir: Vector2i in target_dirs:
+		await _harvest_blood(get_map_position() + dir)
+
+func _harvest_blood(tile: Vector2i) -> void:
+	for civilian: Civilian in Map.CIVILIANS.get_children():
+		if civilian.get_map_position() == tile:
+			civilian.enable_red_highlight()
+			enable_red_highlight()
+			var animation: CPUParticles2D = preload("res://scenes/ui/blood_harvest.tscn").instantiate()
+			civilian.add_child(animation)
+			animation.z_index = 10
+			animation.position.y = -civilian.sprite.size.y * .25
+			animation.modulate = Colors.RED
+			animation.gravity = (global_position - civilian.global_position) * 50
+			await Globals.wait(Globals.get_anim_duration() * 2)
+			await civilian.destroy()
+			blood_harvested.emit()
+
+func harvest_ennemy_blood(ennemy: Ennemy) -> void:
+	ennemy.enable_red_highlight()
+	enable_red_highlight()
+	var animation: CPUParticles2D = preload("res://scenes/ui/blood_harvest.tscn").instantiate()
+	ennemy.add_child(animation)
+	animation.z_index = 10
+	animation.position.y = -ennemy.sprite.size.y * .25
+	animation.modulate = Colors.RED
+	animation.gravity = (global_position - ennemy.global_position) * 50
+	await Globals.wait(Globals.get_anim_duration() * 2)
+	blood_harvested.emit()
+
+func enable_highlight() -> void:
+	sprite.material.set_shader_parameter("outline_color", Colors.GREEN)
+	sprite.material.set_shader_parameter("outline_width", 2.0)
+
 func _on_turn_manager_turn_completed() -> void:
-	if jump > 0:
-		jump -= 1
-		if jump <= 0:
-			await _land_as_mech()
-	can_act = true
+	if fly_duration > 0:
+		fly_duration -= 1
+		if fly_duration <= 0:
+			await _land()
+	for prop: Prop in Map.PROPS.get_children():
+		if prop.is_coffin and prop.get_map_position() == get_map_position():
+			enter_coffin.emit()
+	update_oracle()
+	enable_highlight()
 
 func _reveal_land_mines() -> void:
 	for ennemy: Ennemy in Map.ENNEMIES.get_children():
 		if ennemy is LandMines:
-			if Map.get_distance(get_map_position(), ennemy.get_map_position()) <= 1:
+			if Map.get_orthogonal_distance(get_map_position(), ennemy.get_map_position()) <= 1:
 				ennemy.visible = true
 			else:
 				ennemy.visible = false
 
 func get_hit() -> void:
+	if PlayerRewards.has_reward("Sanguine Pool") > sanguine_pool_use:
+		sanguine_pool_use += 1
+		if randi() % 3 <= PlayerRewards.has_reward("Sixth Sense"):
+			sprite.texture = preload("res://assets/player/blood_pool1.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/blood_pool2.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/blood_pool3.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/blood_pool4.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/blood_pool3.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/blood_pool2.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/blood_pool1.png")
+			await Globals.wait(Globals.get_anim_duration() * .25)
+			sprite.texture = preload("res://assets/player/vampire.png")
+			return
 	Globals.lives -= 1
 
-func update_orcale(tile: Vector2i) -> void:
-	if Map.TILEMAP.get_cell_source_id(tile) < 0:
-		return
+func _update_oracle_on_tile(tile: Vector2i) -> void:
 	match Globals.move_mode:
 		Enums.move_mode.WALK:
 			if can_walk_to(tile):
 				_display_oracle(tile)
-		Enums.move_mode.BLINK:
-			if can_blink_to(tile):
-				_display_oracle(tile)
-		Enums.move_mode.CHARGE:
-			if can_charge_to(tile):
+		Enums.move_mode.TELEPORT:
+			if can_teleport_to(tile):
 				_display_oracle(tile)
 		Enums.move_mode.TIME_TRAVEL:
 			if can_time_travel_to(tile):
 				_display_oracle(tile)
-		Enums.move_mode.JUMP:
-			if can_jump_to(tile):
+		Enums.move_mode.FLY:
+			if can_fly_to(tile):
+				_display_oracle(tile, true)
+		Enums.move_mode.WEREWOLF:
+			if can_werewolf_to(tile):
+				_display_oracle(tile)
+		Enums.move_mode.DASH:
+			if can_dash_to(tile):
 				_display_oracle(tile)
 		_:
 			push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
 
-func _display_oracle(tile: Vector2i) -> void:
+func _display_oracle(tile: Vector2i, fly_mode: bool = fly_duration > 0) -> void:
 	var oracle_icon := TextureRect.new()
-	var pos_dif: Vector2i = Map.vector_to_cardinal(tile - get_map_position())
-	if Map.is_tile_safe(get_map_position(), tile):
-		if pos_dif == Map.E or pos_dif == Map.NE or pos_dif == Map.SE or pos_dif == Map.N:
-			oracle_icon.texture = preload("res://assets/oracle_safe_e.png")
-		else:
-			oracle_icon.texture = preload("res://assets/oracle_safe_w.png")
-		oracle_icon.self_modulate = Color.GREEN_YELLOW
-	else:
-		if pos_dif == Map.E or pos_dif == Map.NE or pos_dif == Map.SE or pos_dif == Map.N:
-			oracle_icon.texture = preload("res://assets/oracle_danger_e.png")
-		else:
-			oracle_icon.texture = preload("res://assets/oracle_danger_w.png")
-		oracle_icon.self_modulate = Color.ORANGE_RED
+	oracle_icon.texture = preload("res://assets/player/oracle_thick.png")
 	ORACLE.add_child(oracle_icon)
 	oracle_icon.global_position = Map.get_global_position(tile)
 	oracle_icon.global_position -= oracle_icon.size * .5
-
-	oracle_icon.self_modulate.a = 0.2
-
-func rescue() -> void:
-	for civilians: Civilians in Map.CIVILIANS.get_children():
-		if civilians.get_map_position() == get_map_position():
-			await _animate_rescue(get_map_position())
-			civilians.queue_free()
-			Globals.rescued_civilians += 1
-			return
-	var shuffled_directions: Array[Vector2i] = Map.orthogonals.duplicate()
-	shuffled_directions.shuffle()
-	for dir: Vector2i in shuffled_directions:
-		for civilians: Civilians in Map.CIVILIANS.get_children():
-			if civilians.get_map_position() == get_map_position() + dir:
-				await _animate_rescue(get_map_position() + dir)
-				civilians.queue_free()
-				Globals.rescued_civilians += 1
-				return
-	for dir: Vector2i in shuffled_directions:
-		for building: Building in Map.BUILDINGS.get_children():
-			if building.get_map_position() == get_map_position() + dir \
-			and building.civilians:
-				await _animate_rescue(get_map_position() + dir)
-				building.rescue()
-				Globals.rescued_civilians += 1
-				return
-
-func _animate_rescue(tile: Vector2i) -> void:
-	var rescue_tween: Tween = create_tween().set_ease(Tween.EASE_IN)
-	var civilian := TextureRect.new()
-	civilian.texture = preload("res://assets/civilian_icon.png")
-	add_child(civilian)
-	civilian.global_position = Map.get_global_position(tile)
-	civilian.global_position -= civilian.size * .5
-	civilian.self_modulate = Color.CYAN
-	rescue_tween.tween_property(
-		civilian, 
-		"global_position", 
-		global_position - civilian.size * .5, 
-		0.5)
-	await rescue_tween.finished
-	civilian.queue_free()
+	if Map.is_tile_safe(get_map_position(), tile) or fly_mode:
+		oracle_icon.modulate = Colors.GREEN
+	else:
+		oracle_icon.modulate = Colors.RED
+		var danger_zone := TextureRect.new()
+		danger_zone.texture = preload("res://assets/player/danger.png")
+		oracle_icon.add_child(danger_zone)
 
 func add_previous_position() -> void:
-	if previous_positions.size()>= 5:
+	if previous_positions.size() >= 10:
 		previous_positions.remove_at(0)
 	previous_positions.append(get_map_position())
+
+func init_light_fog() -> void:
+	LIGHT_FOG.modulate = Colors.BLACK
+	for x: int in range(
+		-Globals.map_sight.x,
+		Globals.map_sight.x + 1
+	):
+		for y: int in range(
+			-Globals.map_sight.y,
+			Globals.map_sight.y + 1
+		):
+			if Vector2i(x, y).distance_to(Vector2i.ZERO) >= Globals.sight:
+				LIGHT_FOG.set_cell(Vector2i(x, y), 0, Vector2.ZERO, 0)
+
+func _trigger_night_bolt(dir: Vector2i) -> void:
+	if PlayerRewards.has_reward("Night Bolt") == 0:
+		return
+	var target_directions: Array[Vector2i] = [dir]
+	if PlayerRewards.has_reward("Night Bolt") >= 2:
+		target_directions.append_array(Map.get_similar_directions(dir, false))
+	if PlayerRewards.has_reward("Night Bolt") >= 3:
+		target_directions.append_array(Map.get_similar_directions(dir, true))
+	var bolts: Array[Bullet] = []
+	for target: Vector2i in target_directions:
+		var bolt: Bullet = preload("res://scenes/ennemies/bullet.tscn").instantiate()
+		add_child(bolt)
+		bolts.append(bolt)
+		bolt.attack_type = Enums.destruction_type.SHADOW
+		bolt.sprite.texture = preload("res://assets/player/bolt.png")
+		if sprite.flip_h:
+			if !bolt.sprite.is_node_ready():
+				await bolt.sprite.ready
+			bolt.sprite.flip_h = true
+		bolt.direction = Map.vector_to_cardinal(target)
+		bolt._move()
+	for bolt: Bullet in bolts:
+		if bolt:
+			await bolt.tree_exited
+
+func _trigger_vengeance(dir: Vector2i) -> void:
+	if PlayerRewards.has_reward("Vengeance") == 0:
+		return
+	var target_tiles: Array[Vector2i] = [
+		get_map_position() + Map.get_opposite_vector(dir) * 2
+	]
+	if PlayerRewards.has_reward("Vengeance") >= 2:
+		var similar_dirs: Array[Vector2i] = Map.get_similar_directions(Map.get_opposite_vector(dir), false)
+		target_tiles.append(target_tiles[0] + similar_dirs[1])
+		target_tiles.append(target_tiles[0] + similar_dirs[2])
+		if PlayerRewards.has_reward("Vengeance") >= 3:
+			target_tiles.append(target_tiles[0] + similar_dirs[1] * 2)
+			target_tiles.append(target_tiles[0] + similar_dirs[2] * 2)
+	var poison_globes: Array[TextureRect] = []
+	for target: Vector2i in target_tiles:
+		if Map.TILEMAP.get_cell_source_id(target) == 0:
+			var poison_globe := TextureRect.new()
+			poison_globes.append(poison_globe)
+			poison_globe.texture = preload("res://assets/map/poison1.png")
+			add_child(poison_globe)
+			CurveTween.tween_curve_path(
+				poison_globe,
+				Map.get_global_position(target),
+				Globals.get_anim_duration() * .5
+			)
+	await Globals.wait(Globals.get_anim_duration() * .5)
+	for target: Vector2i in target_tiles:
+		await Map.add_poison(target)
+	for globe: TextureRect in poison_globes:
+		globe.queue_free()
+
+func update_oracle() -> void:
+	for child in ORACLE.get_children():
+		child.queue_free()
+	if _can_act():
+		for i: int in range(
+			get_map_position().x - Globals.sight,
+			get_map_position().x + Globals.sight + 1
+		):
+			for j: int in range(
+				get_map_position().y - Globals.sight,
+				get_map_position().y + Globals.sight + 1
+			):
+				_update_oracle_on_tile(Vector2i(i, j))
+
+func _trigger_blood_nova(nova_range: int) -> void:
+	var directions: Array[Vector2i]
+	match nova_range:
+		0:
+			return
+		1:
+			directions = [Map.NE, Map.SE, Map.SW, Map.NW]
+		2:
+			directions = Map.cardinals
+		3:
+			directions = Map.cardinals.duplicate()
+			directions.append_array([Map.NE * 2, Map.SE * 2, Map.SW * 2, Map.NW * 2])	
+	var novas: Array[TextureRect] = []
+	var nova_tween := create_tween().set_ease(Tween.EASE_IN_OUT).set_parallel(true)
+	for dir: Vector2i in directions:
+		var nova_icon := TextureRect.new()
+		novas.append(nova_icon)
+		match(Map.vector_to_cardinal(dir)):
+			Map.N:
+				nova_icon.texture = preload("res://assets/player/novaN1.png")
+			Map.S:
+				nova_icon.texture = preload("res://assets/player/novaN1.png")
+				nova_icon.flip_v = true
+			Map.E:
+				nova_icon.texture = preload("res://assets/player/novaE1.png")
+			Map.W:
+				nova_icon.texture = preload("res://assets/player/novaE1.png")
+				nova_icon.flip_h = true
+			Map.NE:
+				nova_icon.texture = preload("res://assets/player/novaNE1.png")
+			Map.NW:
+				nova_icon.texture = preload("res://assets/player/novaNE1.png")
+				nova_icon.flip_h = true
+			Map.SE:
+				nova_icon.texture = preload("res://assets/player/novaNE1.png")
+				nova_icon.flip_v = true
+			Map.SW:
+				nova_icon.texture = preload("res://assets/player/novaNE1.png")
+				nova_icon.flip_h = true
+				nova_icon.flip_v = true
+		add_child(nova_icon)
+		nova_icon.global_position = get_global_position()
+		nova_icon.global_position -= nova_icon.size * .5
+		nova_tween.tween_property(
+			nova_icon,
+			"global_position",
+			Map.get_global_position(get_map_position() + dir) - nova_icon.size * .5,
+			Globals.get_anim_duration() * 0.9
+		)
+	await nova_tween.finished
+	for nova in novas:
+		nova.texture = load(nova.texture.resource_path.left(-5) + "2.png")
+	await Globals.wait(Globals.get_anim_duration() * 0.1)
+	for nova in novas:
+		nova.queue_free()
+	for dir: Vector2i in directions:
+		Map.destroy_tile(get_map_position() + dir, Enums.destruction_type.SHADOW)
+	await Globals.wait(Globals.get_anim_duration())
+
+func zoom_out() -> void:
+	var camera_tween := create_tween().set_parallel(true).set_ease(Tween.EASE_IN_OUT)
+	camera_tween.tween_property(
+		CAMERA,
+		"zoom",
+		Vector2(1.8, 1.8),
+		.9
+	)
+	camera_tween.tween_property(
+		CAMERA,
+		"offset",
+		Vector2(8, 45),
+		.9
+	)
+	await camera_tween.finished
+
+func verify_church_exhausted() -> void:
+	if Map.is_tile_exhausted(get_map_position()) \
+	and PlayerRewards.has_reward("Moon Orb") <= 0:
+		church_exhausted.emit()
+		Globals.move_mode = Enums.move_mode.WALK
+
+func verify_sun_exhausted() -> void:
+	if Globals.turn >= Globals.turns_in_night * .9\
+	and PlayerRewards.has_reward("Moon Orb") <= 0:
+		sun_exhausted.emit()
+		Globals.move_mode = Enums.move_mode.WALK

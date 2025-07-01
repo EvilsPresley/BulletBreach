@@ -1,11 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://dr8e7yx1bf0uq"]
+[gd_scene load_steps=6 format=3 uid="uid://dr8e7yx1bf0uq"]
 
 [ext_resource type="PackedScene" uid="uid://dyqq34kv4qpot" path="res://scenes/abstract/map_object.tscn" id="1_ew0n0"]
 [ext_resource type="Script" uid="uid://dw1rfotxau6h4" path="res://scripts/mobile_object.gd" id="2_xkhyh"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_xnhga"]
+[ext_resource type="Texture2D" uid="uid://bs5eaa8oou6sb" path="res://assets/player/vampire.png" id="4_evckt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_evckt"]
+resource_local_to_scene = true
+shader = ExtResource("3_xnhga")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="MobileObject" instance=ExtResource("1_ew0n0")]
 script = ExtResource("2_xkhyh")
-move_duration = 0.3
 move_range = 1
 directional_sprite = false
 direction = Vector2i(0, 0)
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_evckt")
+offset_left = -24.0
+offset_top = -38.0
+offset_right = 24.0
+offset_bottom = 10.0
+texture = ExtResource("4_evckt")

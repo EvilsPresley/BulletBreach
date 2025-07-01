@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://bpl4vhcjrn1mw"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_ax0dw"]
+[ext_resource type="Resource" uid="uid://dgdro3yj6jovq" path="res://data/rewards/haste1.tres" id="2_ax0dw"]
+[ext_resource type="Texture2D" uid="uid://cxpetoyxdvmkp" path="res://assets/rewards/haste.png" id="3_5dkpp"]
+
+[resource]
+script = ExtResource("1_ax0dw")
+title = "Haste 2"
+type = 0
+texture = ExtResource("3_5dkpp")
+description = "Skills recuperate 1 turn faster thanks to haste."
+rarity = 0
+prerequisites = Array[ExtResource("1_ax0dw")]([ExtResource("2_ax0dw")])
+tags = Array[int]([2])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=3 uid="uid://6r1jwaq4oheo"]
+
+[ext_resource type="PackedScene" uid="uid://cenoy8v38mh1q" path="res://scenes/abstract/ennemy.tscn" id="1_7hasn"]
+[ext_resource type="Script" uid="uid://ifvhwct2i3co" path="res://scripts/ennemies/kamikaze.gd" id="2_2r708"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_t3er0"]
+[ext_resource type="Texture2D" uid="uid://c2lyf6yhtsvwe" path="res://assets/ennemies/kamikaze.png" id="4_t3er0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wno1c"]
+resource_local_to_scene = true
+shader = ExtResource("3_t3er0")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Kamikaze" instance=ExtResource("1_7hasn")]
+script = ExtResource("2_2r708")
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_wno1c")
+texture = ExtResource("4_t3er0")

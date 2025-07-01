@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3 uid="uid://br7f7gki4j14u"]
+
+[ext_resource type="PackedScene" uid="uid://cenoy8v38mh1q" path="res://scenes/abstract/ennemy.tscn" id="1_vc060"]
+[ext_resource type="Script" uid="uid://djn3j7clnowgb" path="res://scripts/ennemies/land_mines.gd" id="2_6hebk"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_blk4x"]
+[ext_resource type="Texture2D" uid="uid://babg6h2o2o6xi" path="res://assets/ennemies/trap.png" id="4_blk4x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_krmkt"]
+resource_local_to_scene = true
+shader = ExtResource("3_blk4x")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="LandMines" instance=ExtResource("1_vc060")]
+script = ExtResource("2_6hebk")
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_krmkt")
+offset_left = -7.0
+offset_top = -9.0
+offset_right = 21.0
+offset_bottom = 23.0
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("4_blk4x")

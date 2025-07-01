@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://dhwus88qh3pg4"]
+
+[ext_resource type="PackedScene" uid="uid://dyqq34kv4qpot" path="res://scenes/abstract/map_object.tscn" id="1_e072f"]
+[ext_resource type="Texture2D" uid="uid://bgx0hi3vt67fv" path="res://assets/map/fog.png" id="2_1o7ot"]
+
+[node name="Fog" instance=ExtResource("1_e072f")]
+
+[node name="Sprite" parent="." index="0"]
+texture = ExtResource("2_1o7ot")
+
+[node name="Highlight" parent="." index="1"]
+visible = false

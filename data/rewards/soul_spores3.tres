@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://cm1vidajn2p7"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_b3ib2"]
+[ext_resource type="Resource" uid="uid://dsrmdwyaj8k2c" path="res://data/rewards/soul_spores2.tres" id="2_qaxvm"]
+[ext_resource type="Texture2D" uid="uid://btpgxaatvubpd" path="res://assets/rewards/soul_spores.png" id="3_8w1h4"]
+
+[resource]
+script = ExtResource("1_b3ib2")
+title = "Soul Spores 3"
+type = 0
+texture = ExtResource("3_8w1h4")
+description = "Soul Spores activate 1 tile further."
+rarity = 1
+prerequisites = Array[ExtResource("1_b3ib2")]([ExtResource("2_qaxvm")])
+tags = Array[int]([5])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3 uid="uid://dfu7r2sy5oosd"]
+
+[ext_resource type="Texture2D" uid="uid://boh6g8x6ytits" path="res://assets/rewards/walk.png" id="1_r2eh5"]
+[ext_resource type="Script" uid="uid://c3mdc778u5pna" path="res://scripts/ui/move_button.gd" id="1_tkqq8"]
+[ext_resource type="Texture2D" uid="uid://chai5tnn34xxo" path="res://assets/ui/black_square.png" id="3_1eex5"]
+[ext_resource type="Texture2D" uid="uid://5vvxtvswipp3" path="res://assets/ui/button_highlight.png" id="3_hnxqx"]
+[ext_resource type="Texture2D" uid="uid://dc6hnbngjdirg" path="res://assets/ui/white_square.png" id="4_nxxp3"]
+
+[node name="MoveButton" type="TextureRect"]
+custom_minimum_size = Vector2(64, 64)
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("1_r2eh5")
+expand_mode = 1
+script = ExtResource("1_tkqq8")
+
+[node name="Reload" type="TextureProgressBar" parent="."]
+layout_mode = 0
+offset_top = 64.0
+offset_right = 64.0
+offset_bottom = 70.0
+value = 40.0
+fill_mode = 1
+texture_under = ExtResource("4_nxxp3")
+texture_progress = ExtResource("3_1eex5")
+
+[node name="Highlight" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_hnxqx")
+
+[node name="Selection" type="TextureRect" parent="."]
+visible = false
+self_modulate = Color(1, 0.560784, 0, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_hnxqx")
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

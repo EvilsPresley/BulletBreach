@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://b32kuaxulvwoe"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_3gs3w"]
+[ext_resource type="Texture2D" uid="uid://be3rsq3fk71nc" path="res://assets/rewards/night_bolt.png" id="2_3gs3w"]
+
+[resource]
+script = ExtResource("1_3gs3w")
+title = "Night Bolt 1"
+type = 0
+texture = ExtResource("2_3gs3w")
+description = "On first walk after using a special move, send a night bolt forward"
+rarity = 0
+prerequisites = Array[ExtResource("1_3gs3w")]([])
+tags = Array[int]([2])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

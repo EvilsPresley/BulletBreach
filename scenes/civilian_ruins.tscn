@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://cu12jbnwko4rp"]
-
-[ext_resource type="PackedScene" uid="uid://84xahnip7u8" path="res://scenes/abstract/building.tscn" id="1_n5qs8"]
-[ext_resource type="Texture2D" uid="uid://bmkuoi586sqta" path="res://assets/civilian_ruins.png" id="2_8s40f"]
-
-[node name="CivilianRuins" instance=ExtResource("1_n5qs8")]
-
-[node name="Sprite" parent="." index="0"]
-texture = ExtResource("2_8s40f")

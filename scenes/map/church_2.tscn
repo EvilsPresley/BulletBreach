@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://p3xj16y580su"]
+
+[ext_resource type="PackedScene" uid="uid://84xahnip7u8" path="res://scenes/abstract/building.tscn" id="1_ss6h6"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="2_g2adx"]
+[ext_resource type="Texture2D" uid="uid://bjt77ia1ovput" path="res://assets/map/church2.png" id="3_g2adx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p035m"]
+resource_local_to_scene = true
+shader = ExtResource("2_g2adx")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Church2" instance=ExtResource("1_ss6h6")]
+destructible = false
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_p035m")
+offset_top = -44.0
+offset_bottom = 9.0
+texture = ExtResource("3_g2adx")

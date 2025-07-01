@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://yg7dxc0ckbul"]
+
+[ext_resource type="PackedScene" uid="uid://cenoy8v38mh1q" path="res://scenes/abstract/ennemy.tscn" id="1_qrxud"]
+[ext_resource type="Script" uid="uid://bu6r2v7acjhvl" path="res://scripts/ennemies/tank.gd" id="2_01nm4"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_sl6yo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lbj5m"]
+resource_local_to_scene = true
+shader = ExtResource("3_sl6yo")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Tank" instance=ExtResource("1_qrxud")]
+script = ExtResource("2_01nm4")
+reload_time = 1
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_lbj5m")

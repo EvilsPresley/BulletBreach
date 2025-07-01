@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://dyfgporekba86"]
+
+[ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_xkpk7"]
+[ext_resource type="Texture2D" uid="uid://b40cqqodryia4" path="res://assets/rewards/vengeance.png" id="2_xkpk7"]
+
+[resource]
+script = ExtResource("1_xkpk7")
+title = "Vengeance 1"
+type = 0
+texture = ExtResource("2_xkpk7")
+description = "On first walk after using a special move, throw a poisoned globe backwards"
+rarity = 0
+prerequisites = Array[ExtResource("1_xkpk7")]([])
+tags = Array[int]([5])
+metadata/_custom_type_script = "uid://b07l0ks2g8d3b"

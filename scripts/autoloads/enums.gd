@@ -1,15 +1,12 @@
 extends Node
 
-enum building_skill {
-	SPAWNER
-}
-
 enum move_mode {
 	WALK,
-	BLINK,
-	CHARGE,
+	TELEPORT,
+	DASH,
 	TIME_TRAVEL,
-	JUMP,
+	FLY,
+	WEREWOLF,
 }
 
 enum plan {
@@ -17,4 +14,57 @@ enum plan {
 	STAND,
 	EXPLODE,
 	RELOAD,
+}
+
+enum reward_type {
+	UPGRADE,
+	INSTANT,
+	SKILL,
+}
+
+enum reward_rarity {
+	COMMON,
+	RARE,
+	EPIC,
+	UNDEFINED,
+}
+
+enum destruction_type {
+	FLAMES,
+	EXPLOSION,
+	LIGHT,
+	SHADOW,
+	POISON,
+}
+
+enum tag {
+	ATTACK,
+	LUCK,
+	SHADOW,
+	FIRE,
+	BLOOD,
+	POISON,
+}
+
+enum tuto {
+	NONE,
+	CASTLE_BURN,
+	WITCH_DIE,
+	VENGEANCE,
+	POWER_GROWS,
+	MOVE_MODE,
+	ARCHER_INTRO,
+	ORACLE_INTRO,
+	FRIENDLY_FIRE,
+	PRIEST_INTRO,
+	PRIEST_SIGHT,
+	KAMIKAZE_INTRO,
+	TRACKER_INTRO,
+	CHURCH_INTRO,
+	DAY_NIGHT_CYCLE,
+	ALMOST_DAY,
+	COFFIN_INTRO,
+	SUN_EXHAUSTED,
+	CHURCH_EXHAUSTED,
+	NEW_DAY,
 }

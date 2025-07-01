@@ -2,11 +2,23 @@ extends Node
 
 var move_mode: Enums.move_mode = Enums.move_mode.WALK
 var turn: int = 0
-var lives: int = 3
+var night: int = 1
+var lives: int = 1
+var level: int = 1
+var anim_duration: float = 0.5
+var calculating_turn: bool = false
 
-const total_civilians: int = 25
-var rescued_civilians: int = 0
-var alive_civilians: int = total_civilians
+const sight: int = 7
+const map_sight: Vector2i = Vector2i(15, 15)
+const turns_in_night: int = 50
+
+const destroyed_ennemies_position: Vector2 = Vector2(-10000, -10000)
+
+const bat_cooldown: int = 9
+const werewolf_cooldown: int = 10
+const teleport_cooldown: int = 6
+const time_travel_cooldown: int = 6
+const dash_cooldown: int = 7
 
 func wait(duration_factor: float = 1.0) -> void:
 	await get_tree().create_timer(duration_factor).timeout
@@ -35,7 +47,23 @@ func get_direction_string(direction: Vector2i) -> String:
 	return "N"
 
 func reset() -> void:
-	alive_civilians = total_civilians
-	rescued_civilians = 0
+	move_mode = Enums.move_mode.WALK
 	turn = 0
-	lives = 3
+	night = 1
+	lives = 1
+	level = 1
+	anim_duration = 0.5
+	calculating_turn = false
+
+func get_anim_duration() -> float:
+	return anim_duration
+
+func set_anim_duration(ennemies_count: int) -> void:
+	if ennemies_count <= 4:
+		anim_duration = 0.5
+	elif ennemies_count <= 10:
+		anim_duration = 0.31
+	elif ennemies_count <= 15:
+		anim_duration = 0.21
+	else:
+		anim_duration = 0.12

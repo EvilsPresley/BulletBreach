@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://hjclpi0dlud0"]
+
+[node name="BloodHarvest" type="CPUParticles2D"]
+amount = 64
+lifetime = 0.2
+preprocess = 0.2
+emission_shape = 1
+emission_sphere_radius = 5.0
+gravity = Vector2(50, 50)

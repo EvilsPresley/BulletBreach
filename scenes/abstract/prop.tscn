@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://bls0xrkohea3m"]
+
+[ext_resource type="PackedScene" uid="uid://dyqq34kv4qpot" path="res://scenes/abstract/map_object.tscn" id="1_qr2v8"]
+[ext_resource type="Script" uid="uid://doumhn66lkdic" path="res://scripts/prop.gd" id="2_8mfn2"]
+[ext_resource type="Shader" uid="uid://bv25hbkon7i52" path="res://scripts/shaders/outline.gdshader" id="3_xhbmh"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gtsib"]
+resource_local_to_scene = true
+shader = ExtResource("3_xhbmh")
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/texture_region = Vector4(0, 0, 0, 0)
+
+[node name="Prop" instance=ExtResource("1_qr2v8")]
+script = ExtResource("2_8mfn2")
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource("ShaderMaterial_gtsib")

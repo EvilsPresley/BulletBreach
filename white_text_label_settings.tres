@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://conx1sts6ijns"]
+
+[ext_resource type="FontFile" uid="uid://btmwvpt1xubd1" path="res://assets/EnterCommand.ttf" id="1_2xcgo"]
+
+[resource]
+line_spacing = -8.0
+font = ExtResource("1_2xcgo")
+font_size = 32
