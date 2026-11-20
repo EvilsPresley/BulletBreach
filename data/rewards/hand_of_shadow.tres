@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_vpxqp")
+id = &"hand_of_shadow"
+stack_group = &"hand_of_shadow"
 title = "Hand Of Shadow"
 type = 0
 texture = ExtResource("2_vpxqp")

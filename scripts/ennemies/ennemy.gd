@@ -5,6 +5,8 @@ class_name Ennemy
 ## Tutorial banner shown the first time this kind of enemy appears.
 @export var intro_tuto: Enums.tuto = Enums.tuto.NONE
 var reload_counter: int = 0
+## Data this enemy was spawned from (EnemyDefinition), null for mines etc.
+var definition: Resource = null
 
 var planned_action: Enums.plan = Enums.plan.STAND:
 	set(value):
@@ -146,7 +148,7 @@ func _turn(pos_dif: Vector2i) -> void:
 func destroy(can_harvest_blood: bool = true) -> void:
 	clear_plan()
 	if Map.get_orthogonal_distance(Map.PLAYER.get_map_position(),
-		get_map_position()) <= PlayerRewards.has_reward("Soul Spores") \
+		get_map_position()) <= PlayerRewards.stacks(&"soul_spores") \
 	and can_harvest_blood:
 		await Map.PLAYER.harvest_ennemy_blood(self)
 	global_position = Globals.destroyed_ennemies_position

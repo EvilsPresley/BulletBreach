@@ -116,9 +116,9 @@ func activate_reward(reward: Reward) -> void:
 		MOVE_BUTTONS.add_move(reward)
 	if Globals.level == 2:
 		create_tuto(Enums.tuto.MOVE_MODE)
-	elif ((reward.tags.find(Enums.tag.BLOOD) >= 0 and PlayerRewards.has_reward("Hand Of Blood") > 0) \
-	or (reward.tags.find(Enums.tag.POISON) >= 0 and PlayerRewards.has_reward("Hand Of Poison") > 0) \
-	or (reward.tags.find(Enums.tag.SHADOW) >= 0 and PlayerRewards.has_reward("Hand Of Shadow") > 0)) \
+	elif ((reward.tags.find(Enums.tag.BLOOD) >= 0 and PlayerRewards.stacks(&"hand_of_blood") > 0) \
+	or (reward.tags.find(Enums.tag.POISON) >= 0 and PlayerRewards.stacks(&"hand_of_poison") > 0) \
+	or (reward.tags.find(Enums.tag.SHADOW) >= 0 and PlayerRewards.stacks(&"hand_of_shadow") > 0)) \
 	and !free_hand_reward:
 		free_hand_reward = true
 		create_choice_modal("Free reward!", PlayerRewards.get_level_up_rewards())

@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://0exljjvlyj2e"]
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://0exljjvlyj2e"]
 
 [ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_72wnk"]
 [ext_resource type="Texture2D" uid="uid://cb02o736y0ihu" path="res://assets/rewards/time_travel.png" id="2_72wnk"]
+[ext_resource type="Resource" path="res://data/abilities/time_travel.tres" id="ability_res"]
 
 [resource]
 script = ExtResource("1_72wnk")
+id = &"time_travel"
+stack_group = &"time_travel"
+ability = ExtResource("ability_res")
 title = "Time Travel"
 type = 2
 texture = ExtResource("2_72wnk")

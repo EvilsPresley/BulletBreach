@@ -45,25 +45,24 @@ func _ready() -> void:
 			"type_o_negative1", "versatile1"]:
 		await _settle()
 		await main.activate_reward(load("res://data/rewards/%s.tres" % r))
-	print("CHECK rewards owned: %s" % PlayerRewards.owned_rewards.size())
+	print("CHECK rewards owned: %s, skill buttons: %d, effects: %s" % [PlayerRewards.owned_rewards.size(), main.MOVE_BUTTONS.get_child_count(), PlayerRewards.get_effects().map(func(e): return [e.effect.resource_path.get_file(), e.stacks])])
 
 	# 3. Play turns.
 	var modes_used := {}
 	for i in TURNS:
 		await _settle()
 		Globals.lives = 99
-		var mode := _pick_mode()
-		Globals.move_mode = mode
-		var tiles := _candidate_tiles(mode)
+		Globals.selected_ability = _pick_ability()
+		var tiles := _candidate_tiles()
 		if tiles.is_empty():
-			Globals.move_mode = Enums.move_mode.WALK
-			tiles = _candidate_tiles(Enums.move_mode.WALK)
+			Globals.selected_ability = null
+			tiles = _candidate_tiles()
 		if tiles.is_empty():
 			print("TURN %d: no legal move" % i)
 			break
 		var safe := tiles.filter(func(t): return Map.is_tile_safe(player.get_map_position(), t))
 		var pick: Vector2i = (safe if !safe.is_empty() else tiles).pick_random()
-		var used: String = Enums.move_mode.keys()[Globals.move_mode]
+		var used: String = String(player.get_active_ability().id) if player.get_active_ability().id else player.get_active_ability().get_script().get_global_name()
 		turn_done = false
 		var ok: bool = await player.try_act(pick)
 		if !ok:
@@ -74,7 +73,7 @@ func _ready() -> void:
 		print("TURN %2d %-11s enemies=%2d civilians=%d buildings=%d level=%d" % [Globals.turn, used,
 			Map.ENNEMIES.get_child_count(), Map.CIVILIANS.get_child_count(),
 			Map.BUILDINGS.get_child_count(), Globals.level])
-	print("CHECK modes used: %s" % modes_used)
+	print("CHECK abilities used: %s" % modes_used)
 
 	# 4. Death signal.
 	await _settle()
@@ -85,33 +84,23 @@ func _ready() -> void:
 	print("SMOKE TEST DONE errors=%d" % errors)
 	get_tree().quit()
 
-func _pick_mode() -> Enums.move_mode:
+func _pick_ability() -> MoveAbility:
 	if player.fly_duration > 0 or randf() < 0.5:
-		return Enums.move_mode.WALK
+		return null
 	var ready: Array = []
 	for frame in main.MOVE_BUTTONS.get_children():
 		for b in frame.get_children():
-			if b is MoveButton and b.get_reload() == 0:
-				ready.append(b.move_mode)
-	return ready.pick_random() if !ready.is_empty() else Enums.move_mode.WALK
+			if b is MoveButton and b.ability != null and b.get_reload() == 0:
+				ready.append(b.ability)
+	return ready.pick_random() if !ready.is_empty() else null
 
-func _candidate_tiles(mode: Enums.move_mode) -> Array:
-	var checks := {
-		Enums.move_mode.WALK: player.can_walk_to,
-		Enums.move_mode.TELEPORT: player.can_teleport_to,
-		Enums.move_mode.DASH: player.can_dash_to,
-		Enums.move_mode.FLY: player.can_fly_to,
-		Enums.move_mode.TIME_TRAVEL: player.can_time_travel_to,
-		Enums.move_mode.WEREWOLF: player.can_werewolf_to,
-	}
-	var check: Callable = checks[mode]
-	if player.fly_duration > 0:
-		check = player.can_fly_to
+func _candidate_tiles() -> Array:
+	var ability: MoveAbility = player.get_active_ability()
 	var out: Array = []
 	var p: Vector2i = player.get_map_position()
 	for x in range(-4, 5):
 		for y in range(-4, 5):
-			if check.call(p + Vector2i(x, y)):
+			if ability.can_target(player, p + Vector2i(x, y)):
 				out.append(p + Vector2i(x, y))
 	return out
 

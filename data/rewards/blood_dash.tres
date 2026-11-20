@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_mqtfo")
+id = &"blood_dash"
+stack_group = &"blood_dash"
 title = "Blood Dash"
 type = 0
 texture = ExtResource("3_n73gb")

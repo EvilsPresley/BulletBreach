@@ -3,49 +3,19 @@ class_name TurnManager
 
 @onready var MODALS: Control = owner.get_node("Ui/Modal")
 
-const TANK = preload("res://scenes/ennemies/tank.tscn")
-const ARTILLERY = preload("res://scenes/ennemies/artillery.tscn")
-const KAMIKAZE = preload("res://scenes/ennemies/kamikaze.tscn")
-const MINES_LAYER = preload("res://scenes/ennemies/mine_layer.tscn")
-
-const TANK_INDEX: int = 0
-const ARTILLERY_INDEX: int = 1
-const KAMIKAZE_INDEX: int = 2
-const MINES_LAYER_INDEX: int = 3
+## Which enemies spawn, in which order. Edit the .tres to rebalance.
+@export var spawn_table: SpawnTable = preload("res://data/spawn/default_spawn_table.tres")
 var _introduced_tutos: Dictionary = {}
 
 signal turn_completed
 signal first_spawn
 
-func get_spawn_ennemy() -> PackedScene:
-	var ennemies: Array[int] = [0, 0, 0, 0]
+func get_spawn_definition() -> EnemyDefinition:
+	var alive: Dictionary = {}
 	for ennemy: Ennemy in Map.ENNEMIES.get_children():
-		if ennemy is Tank:
-			ennemies[TANK_INDEX] += 1
-		elif ennemy is Artillery:
-			ennemies[ARTILLERY_INDEX] += 1
-		elif ennemy is Kamikaze:
-			ennemies[KAMIKAZE_INDEX] += 1
-		elif ennemy is MineLayer:
-			ennemies[MINES_LAYER_INDEX] += 1
-	
-	if ennemies[TANK_INDEX] < 2:
-		return TANK
-	if ennemies[ARTILLERY_INDEX] < 1:
-		return ARTILLERY
-	if ennemies[TANK_INDEX] < 3:
-		return TANK
-	if ennemies[KAMIKAZE_INDEX] < 1:
-		return KAMIKAZE
-	if ennemies[TANK_INDEX] < 4:
-		return TANK
-	if ennemies[ARTILLERY_INDEX] < 2:
-		return ARTILLERY
-	if ennemies[KAMIKAZE_INDEX] < 2:
-		return KAMIKAZE
-	if ennemies[MINES_LAYER_INDEX] < 1:
-		return MINES_LAYER
-	return TANK
+		if ennemy.definition:
+			alive[ennemy.definition] = alive.get(ennemy.definition, 0) + 1
+	return spawn_table.pick(alive)
 
 func take_turn() -> void:
 	Globals.calculating_turn = true
@@ -104,7 +74,9 @@ func spawn(number_of_spawns: int = 1) -> void:
 	spawn_positions.shuffle()
 	
 	for spawn_position: Vector2i in spawn_positions.slice(0, number_of_spawns):
-		var spawning_ennemy: Ennemy = get_spawn_ennemy().instantiate()
+		var definition: EnemyDefinition = get_spawn_definition()
+		var spawning_ennemy: Ennemy = definition.scene.instantiate()
+		spawning_ennemy.definition = definition
 		spawning_ennemy.set_map_position(spawn_position)
 		Map.ENNEMIES.add_child(spawning_ennemy)
 		spawning_ennemy.enable_highlight()

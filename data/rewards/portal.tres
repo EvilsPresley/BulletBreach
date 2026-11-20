@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_nbret")
+id = &"portal"
+stack_group = &"portal"
 title = "Portal"
 type = 0
 texture = ExtResource("3_obft5")

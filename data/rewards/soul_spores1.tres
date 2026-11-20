@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_bf03l")
+id = &"soul_spores1"
+stack_group = &"soul_spores"
 title = "Soul Spores 1"
 type = 0
 texture = ExtResource("2_e3glm")

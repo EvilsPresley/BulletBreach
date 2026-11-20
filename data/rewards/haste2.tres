@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_ax0dw")
+id = &"haste2"
+stack_group = &"haste"
 title = "Haste 2"
 type = 0
 texture = ExtResource("3_5dkpp")

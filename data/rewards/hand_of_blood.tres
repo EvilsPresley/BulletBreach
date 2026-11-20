@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_jrmjp")
+id = &"hand_of_blood"
+stack_group = &"hand_of_blood"
 title = "Hand Of Blood"
 type = 0
 texture = ExtResource("2_jrmjp")

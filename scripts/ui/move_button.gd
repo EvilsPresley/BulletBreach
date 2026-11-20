@@ -5,7 +5,8 @@ class_name  MoveButton
 @onready var HIGHLIGHT: TextureRect = $Highlight
 @onready var SELECTION: TextureRect = $Selection
 
-@export var move_mode: Enums.move_mode = Enums.move_mode.WALK
+## Ability selected by this button (null = walk).
+@export var ability: MoveAbility
 @export var reload_time: int = 0
 
 func _ready() -> void:
@@ -13,7 +14,7 @@ func _ready() -> void:
 	RELOAD.value = 0
 
 func _process(_delta: float) -> void:
-	if Globals.move_mode == move_mode:
+	if Globals.selected_ability == ability:
 		SELECTION.visible = true
 	else:
 		SELECTION.visible = false
@@ -52,11 +53,11 @@ func _on_mouse_exited() -> void:
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			if Globals.move_mode == move_mode or self_modulate.a < 1:
-				Globals.move_mode = Enums.move_mode.WALK
+			if Globals.selected_ability == ability or self_modulate.a < 1:
+				Globals.selected_ability = null
 			else:
-				Globals.move_mode = move_mode
-				if Globals.move_mode != Enums.move_mode.WALK:
+				Globals.selected_ability = ability
+				if ability != null:
 					Map.PLAYER.verify_church_exhausted()
 					Map.PLAYER.verify_sun_exhausted()
 			Map.PLAYER.update_oracle()

@@ -1,6 +1,10 @@
 extends Resource
 class_name Reward
 
+## Stable identifier (file name). Never derive logic from `title`.
+@export var id: StringName
+## Levels of the same upgrade share a group, e.g. night_bolt1..3 -> night_bolt.
+@export var stack_group: StringName
 @export var title: String
 @export var type: Enums.reward_type
 @export var texture: Texture2D = preload("res://assets/rewards/placeholder.png")
@@ -8,6 +12,10 @@ class_name Reward
 @export var rarity: Enums.reward_rarity
 @export var prerequisites: Array[Reward]
 @export var tags: Array[Enums.tag]
+## SKILL rewards: the move ability granted.
+@export var ability: MoveAbility
+## Triggered behaviour for upgrades (shared by all levels of a stack group).
+@export var effect: RewardEffect
 
 func get_tags_bbcode() -> String:
 	var code: String = ""
@@ -35,19 +43,6 @@ func get_tags_bbcode() -> String:
 	return code
 
 func get_description() -> String:
-	if type != Enums.reward_type.SKILL:
+	if type != Enums.reward_type.SKILL or ability == null:
 		return description
-	match title:
-		"Bat Form":
-			return description + "\n[center][color=%s]Cooldown:[/color] %s turns" % [Colors.BLUE.to_html(), Globals.bat_cooldown]
-		"Stallion Dash":
-			return description + "\n[center][color=%s]Cooldown:[/color] %s turns" % [Colors.BLUE.to_html(), Globals.dash_cooldown]
-		"Teleportation":
-			return description + "\n[center][color=%s]Cooldown:[/color] %s turns" % [Colors.BLUE.to_html(), Globals.teleport_cooldown]
-		"Time Travel":
-			return description + "\n[center][color=%s]Cooldown:[/color] %s turns" % [Colors.BLUE.to_html(), Globals.time_travel_cooldown]
-		"Werewolf Assault":
-			return description + "\n[center][color=%s]Cooldown:[/color] %s turns" % [Colors.BLUE.to_html(), Globals.werewolf_cooldown]
-		_:
-			push_error("No cooldown mapped to %s" % title)
-			return description
+	return description + "\n[center][color=%s]Cooldown:[/color] %s turns" % [Colors.BLUE.to_html(), ability.cooldown]

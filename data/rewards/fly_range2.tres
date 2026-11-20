@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_quyfk")
+id = &"fly_range2"
+stack_group = &"fly_range"
 title = "Fly Range 2"
 type = 0
 texture = ExtResource("3_quyfk")

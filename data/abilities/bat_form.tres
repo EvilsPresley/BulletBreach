@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BatFormAbility" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/bat_form_ability.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"bat_form"
+cooldown = 9
+oracle_ignores_threats = true

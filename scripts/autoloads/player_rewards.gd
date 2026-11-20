@@ -56,7 +56,7 @@ func _get_rewards(number_of_skills: int, number_of_upgrades: int) -> Array[Rewar
 	return chosen_rewards
 
 func _get_level_up_upgrades() -> Array[Reward]:
-	var number_of_upgrades = 3 + has_reward("Versatile")
+	var number_of_upgrades = 3 + stacks(&"versatile")
 	return _get_rewards(0, number_of_upgrades)
 	
 func _get_all_rewards() -> Array[Reward]:
@@ -67,12 +67,25 @@ func _get_all_rewards() -> Array[Reward]:
 		possible_rewards.append(load(dir_path + "/" + scene_path))
 	return possible_rewards
 
-func has_reward(reward_title: String) -> int:
-	return owned_rewards.filter(
-		func(r: Reward) -> bool:
-			return r.title.begins_with(reward_title) \
-			and r.title.length() <= reward_title.length() + 2
-			).size()
+## Number of owned levels of an upgrade, e.g. stacks(&"night_bolt") -> 0..3.
+func stacks(group: StringName) -> int:
+	var count: int = 0
+	for reward: Reward in owned_rewards:
+		if reward.stack_group == group:
+			count += 1
+	return count
+
+## Owned effects (one entry per effect, with its stack count), by priority.
+func get_effects() -> Array[Dictionary]:
+	var by_effect: Dictionary = {}
+	for reward: Reward in owned_rewards:
+		if reward.effect:
+			by_effect[reward.effect] = by_effect.get(reward.effect, 0) + 1
+	var result: Array[Dictionary] = []
+	for effect: RewardEffect in by_effect:
+		result.append({"effect": effect, "stacks": by_effect[effect]})
+	result.sort_custom(func(a, b): return a.effect.priority < b.effect.priority)
+	return result
 
 func initialise_rewards_draw_pile() -> void:
 	rewards_draw_pile = []
@@ -91,16 +104,16 @@ func initialise_rewards_draw_pile() -> void:
 	rewards_draw_pile.shuffle()
 
 func get_teleport_range() -> int:
-	return 2 + has_reward("Teleport Range")
+	return 2 + stacks(&"teleport_range")
 
 func get_dash_range() -> Array[int]:
 	var dash_range: Array[int] = [2]
-	for i: int in has_reward("Dash Range"):
+	for i: int in stacks(&"dash_range"):
 		dash_range.append(2 + i + 1)
 	return dash_range
 
 func get_fly_duration() -> int:
-	return 1 + has_reward("Fly Range")
+	return 1 + stacks(&"fly_range")
 
 func get_werewolf_range() -> int:
-	return 3 + has_reward("Werewolf Range")
+	return 3 + stacks(&"werewolf_range")

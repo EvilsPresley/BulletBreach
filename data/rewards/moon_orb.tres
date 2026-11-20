@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_ctsah")
+id = &"moon_orb"
+stack_group = &"moon_orb"
 title = "Moon Orb"
 type = 0
 texture = ExtResource("2_ctsah")

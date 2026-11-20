@@ -1,6 +1,10 @@
 extends MobileObject
 class_name Player
 
+## Default move and the automatic move while in bat form.
+var walk_ability: MoveAbility = WalkAbility.new()
+var flight_step_ability: MoveAbility = FlightStepAbility.new()
+
 var moving: bool = false
 var was_special_move: bool = false
 
@@ -44,52 +48,24 @@ func _input(event: InputEvent) -> void:
 		var world_position: Vector2 = get_canvas_transform().affine_inverse() * event.position
 		try_act(Map.get_map_position(world_position))
 
-## Tries to act on the given tile with the current move mode.
+## The ability that a click will use right now.
+func get_active_ability() -> MoveAbility:
+	if fly_duration > 0:
+		return flight_step_ability
+	if Globals.selected_ability:
+		return Globals.selected_ability
+	return walk_ability
+
+## Tries to act on the given tile with the active ability.
 ## Returns true if a move was performed. Also used by the headless smoke test.
 func try_act(tile: Vector2i) -> bool:
 	if !_can_act():
 		return false
-	if fly_duration > 0:
-		if !can_fly_to(tile):
-			return false
-		await _move_start(tile)
-		await fly_to(tile)
-		return true
-	match Globals.move_mode:
-		Enums.move_mode.WALK:
-			if !can_walk_to(tile):
-				return false
-			await _move_start(tile)
-			await walk_to(tile)
-		Enums.move_mode.TELEPORT:
-			if !can_teleport_to(tile):
-				return false
-			await _move_start(tile)
-			await teleport_to(tile)
-		Enums.move_mode.TIME_TRAVEL:
-			if !can_time_travel_to(tile):
-				return false
-			await _move_start(tile)
-			await time_travel_to(tile)
-		Enums.move_mode.FLY:
-			if !can_fly_to(tile):
-				return false
-			await _move_start(tile)
-			await take_off()
-			await fly_to(tile)
-		Enums.move_mode.WEREWOLF:
-			if !can_werewolf_to(tile):
-				return false
-			await _move_start(tile)
-			await werewolf_to(tile)
-		Enums.move_mode.DASH:
-			if !can_dash_to(tile):
-				return false
-			await _move_start(tile)
-			await dash_to(tile)
-		_:
-			push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
-			return false
+	var ability: MoveAbility = get_active_ability()
+	if !ability.can_target(self, tile):
+		return false
+	await _move_start(tile)
+	await ability.execute(self, tile)
 	return true
 
 func _can_act() -> bool:
@@ -99,7 +75,7 @@ func _move_start(target: Vector2i) -> void:
 	Map.re_activate_visible_ennemies(target)
 	moving = true
 	update_oracle()
-	Events.player_move_started.emit(Globals.move_mode, fly_duration > 0)
+	Events.player_move_started.emit(Globals.selected_ability, fly_duration > 0)
 	await _harvest_blood(target)
 
 func can_werewolf_to(target: Vector2i) -> bool:
@@ -114,7 +90,7 @@ func can_werewolf_to(target: Vector2i) -> bool:
 		).size() == 1 \
 		or Map.CIVILIANS.get_children().filter(
 			func(c) -> bool:return c.get_map_position() == target).size() == 1 \
-		or (PlayerRewards.has_reward("Demon Wolf") \
+		or (PlayerRewards.stacks(&"demon_wolf") \
 			and Map.ENNEMIES.get_children().filter(
 				func(e) -> bool: return e.get_map_position() == target).size() == 1))
 	else:
@@ -165,7 +141,7 @@ func can_time_travel_to(target: Vector2i) -> bool:
 	and !Map.is_under_fog(target)
 
 func time_travel_to(target: Vector2i) -> void:
-	Events.cooldowns_reduced.emit(PlayerRewards.has_reward("Haste"))
+	Events.cooldowns_reduced.emit(PlayerRewards.stacks(&"haste"))
 	move_tween = create_tween()
 	move_tween.tween_property(
 		GLOBAL_OVERLAY, 
@@ -217,7 +193,7 @@ func fly_to(target: Vector2i) -> void:
 	var candidate_poison_tiles: Array[Vector2i] = Map.cardinals.duplicate()
 	candidate_poison_tiles.remove_at(candidate_poison_tiles.find(Map.get_opposite_vector(direction)))
 	candidate_poison_tiles.shuffle()
-	for i: int in PlayerRewards.has_reward("Poison Shells") * 2:
+	for i: int in PlayerRewards.stacks(&"poison_shells") * 2:
 		Map.add_poison(get_map_position() + candidate_poison_tiles[i])
 	await Map.add_poison(previous_tile)
 	_move_end()
@@ -284,8 +260,8 @@ func dash_to(target: Vector2i) -> void:
 		Globals.get_anim_duration() * 1.2)
 	move_tween.tween_callback(move_end)
 	await move_tween.finished
-	if PlayerRewards.has_reward("Blood Dash"):
-		await _trigger_blood_nova(max(1, PlayerRewards.has_reward("Blood Nova")))
+	if PlayerRewards.stacks(&"blood_dash"):
+		await trigger_blood_nova(max(1, PlayerRewards.stacks(&"blood_nova")))
 	_move_end()
 	
 func can_teleport_to(target: Vector2i) -> bool:
@@ -333,7 +309,7 @@ func teleport_to(target: Vector2i) -> void:
 		"modulate", 
 		Color(0., 2., 2., 0.),
 		Globals.get_anim_duration() * 2)
-	if PlayerRewards.has_reward("Portal") > 0:
+	if PlayerRewards.stacks(&"portal") > 0:
 		move_tween.tween_callback(create_portals.bind(target))
 	move_tween.tween_callback(move_end)
 	await move_tween.finished
@@ -404,12 +380,13 @@ func _move_end(is_special_move: bool = true) -> void:
 		if walked_into_portal:
 			await portal_teleport(target_portal)
 			add_previous_position()
+	var effects: Array[Dictionary] = PlayerRewards.get_effects()
 	if was_special_move and !is_special_move:
-		await _trigger_night_bolt(direction)
-		await _trigger_vengeance(direction)
-		await _trigger_blood_nova(PlayerRewards.has_reward("Blood Nova"))
+		for entry: Dictionary in effects:
+			await entry.effect.on_walk_after_special(self, direction, entry.stacks)
 	was_special_move = is_special_move
-	await _harvest_blood_around()
+	for entry: Dictionary in effects:
+		await entry.effect.on_move_end(self, entry.stacks)
 	disable_highlight()
 	Map.update_fog()
 	_reveal_land_mines()
@@ -417,9 +394,9 @@ func _move_end(is_special_move: bool = true) -> void:
 	moving = false
 	turn_complete.emit()
 
-func _harvest_blood_around() -> void:
+func harvest_blood_around(level: int) -> void:
 	var target_dirs: Array[Vector2i] = []
-	match PlayerRewards.has_reward("Soul Siphon"):
+	match level:
 		0: return
 		1:
 			target_dirs.append_array([
@@ -497,9 +474,9 @@ func _reveal_land_mines() -> void:
 				ennemy.visible = false
 
 func get_hit() -> void:
-	if PlayerRewards.has_reward("Sanguine Pool") > sanguine_pool_use:
+	if PlayerRewards.stacks(&"sanguine_pool") > sanguine_pool_use:
 		sanguine_pool_use += 1
-		if randi() % 3 <= PlayerRewards.has_reward("Sixth Sense"):
+		if randi() % 3 <= PlayerRewards.stacks(&"sixth_sense"):
 			sprite.texture = preload("res://assets/player/blood_pool1.png")
 			await Globals.wait(Globals.get_anim_duration() * .25)
 			sprite.texture = preload("res://assets/player/blood_pool2.png")
@@ -521,27 +498,9 @@ func get_hit() -> void:
 		died.emit()
 
 func _update_oracle_on_tile(tile: Vector2i) -> void:
-	match Globals.move_mode:
-		Enums.move_mode.WALK:
-			if can_walk_to(tile):
-				_display_oracle(tile)
-		Enums.move_mode.TELEPORT:
-			if can_teleport_to(tile):
-				_display_oracle(tile)
-		Enums.move_mode.TIME_TRAVEL:
-			if can_time_travel_to(tile):
-				_display_oracle(tile)
-		Enums.move_mode.FLY:
-			if can_fly_to(tile):
-				_display_oracle(tile, true)
-		Enums.move_mode.WEREWOLF:
-			if can_werewolf_to(tile):
-				_display_oracle(tile)
-		Enums.move_mode.DASH:
-			if can_dash_to(tile):
-				_display_oracle(tile)
-		_:
-			push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
+	var ability: MoveAbility = get_active_ability()
+	if ability.can_target(self, tile):
+		_display_oracle(tile, ability.oracle_ignores_threats or fly_duration > 0)
 
 func _display_oracle(tile: Vector2i, fly_mode: bool = fly_duration > 0) -> void:
 	var oracle_icon := TextureRect.new()
@@ -575,13 +534,13 @@ func init_light_fog() -> void:
 			if Vector2i(x, y).distance_to(Vector2i.ZERO) >= Globals.sight:
 				LIGHT_FOG.set_cell(Vector2i(x, y), 0, Vector2.ZERO, 0)
 
-func _trigger_night_bolt(dir: Vector2i) -> void:
-	if PlayerRewards.has_reward("Night Bolt") == 0:
+func trigger_night_bolt(dir: Vector2i, level: int) -> void:
+	if level == 0:
 		return
 	var target_directions: Array[Vector2i] = [dir]
-	if PlayerRewards.has_reward("Night Bolt") >= 2:
+	if level >= 2:
 		target_directions.append_array(Map.get_similar_directions(dir, false))
-	if PlayerRewards.has_reward("Night Bolt") >= 3:
+	if level >= 3:
 		target_directions.append_array(Map.get_similar_directions(dir, true))
 	var bolts: Array[Bullet] = []
 	for target: Vector2i in target_directions:
@@ -600,17 +559,17 @@ func _trigger_night_bolt(dir: Vector2i) -> void:
 		if bolt:
 			await bolt.tree_exited
 
-func _trigger_vengeance(dir: Vector2i) -> void:
-	if PlayerRewards.has_reward("Vengeance") == 0:
+func trigger_vengeance(dir: Vector2i, level: int) -> void:
+	if level == 0:
 		return
 	var target_tiles: Array[Vector2i] = [
 		get_map_position() + Map.get_opposite_vector(dir) * 2
 	]
-	if PlayerRewards.has_reward("Vengeance") >= 2:
+	if level >= 2:
 		var similar_dirs: Array[Vector2i] = Map.get_similar_directions(Map.get_opposite_vector(dir), false)
 		target_tiles.append(target_tiles[0] + similar_dirs[1])
 		target_tiles.append(target_tiles[0] + similar_dirs[2])
-		if PlayerRewards.has_reward("Vengeance") >= 3:
+		if level >= 3:
 			target_tiles.append(target_tiles[0] + similar_dirs[1] * 2)
 			target_tiles.append(target_tiles[0] + similar_dirs[2] * 2)
 	var poison_globes: Array[TextureRect] = []
@@ -645,7 +604,7 @@ func update_oracle() -> void:
 			):
 				_update_oracle_on_tile(Vector2i(i, j))
 
-func _trigger_blood_nova(nova_range: int) -> void:
+func trigger_blood_nova(nova_range: int) -> void:
 	var directions: Array[Vector2i]
 	match nova_range:
 		0:
@@ -722,12 +681,12 @@ func zoom_out() -> void:
 
 func verify_church_exhausted() -> void:
 	if Map.is_tile_exhausted(get_map_position()) \
-	and PlayerRewards.has_reward("Moon Orb") <= 0:
+	and PlayerRewards.stacks(&"moon_orb") <= 0:
 		church_exhausted.emit()
-		Globals.move_mode = Enums.move_mode.WALK
+		Globals.selected_ability = null
 
 func verify_sun_exhausted() -> void:
 	if Globals.turn >= Globals.turns_in_night * .9\
-	and PlayerRewards.has_reward("Moon Orb") <= 0:
+	and PlayerRewards.stacks(&"moon_orb") <= 0:
 		sun_exhausted.emit()
-		Globals.move_mode = Enums.move_mode.WALK
+		Globals.selected_ability = null

@@ -7,7 +7,8 @@ extends Node
 ## An enemy arrow was shot (used by the friendly-fire tutorial).
 signal arrow_fired
 ## The player started a move. `is_flying` is true while in bat form.
-signal player_move_started(move_mode: Enums.move_mode, is_flying: bool)
+## `ability` is the selected MoveAbility, or null for a plain walk.
+signal player_move_started(ability: Resource, is_flying: bool)
 ## Reduce every active skill cooldown by `turns` (Haste upgrade).
 signal cooldowns_reduced(turns: int)
 ## An enemy was spawned on the map and finished its first plan.

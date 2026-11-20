@@ -6,7 +6,7 @@ class_name Ui
 signal level_up
 
 func _on_player_blood_harvested() -> void:
-	XP_BAR.value += 1 + PlayerRewards.has_reward("Type O Negative") * 0.35
+	XP_BAR.value += 1 + PlayerRewards.stacks(&"type_o_negative") * 0.35
 	if XP_BAR.value >= XP_BAR.max_value:
 		Globals.level += 1
 		XP_BAR.value = 0

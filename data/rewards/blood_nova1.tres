@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://mnjql6ou6c3l"]
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://mnjql6ou6c3l"]
 
 [ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_v26oa"]
 [ext_resource type="Texture2D" uid="uid://cyhtoqbb4w3n6" path="res://assets/rewards/blood_nova.png" id="2_v26oa"]
+[ext_resource type="Resource" path="res://data/effects/blood_nova.tres" id="effect_res"]
 
 [resource]
 script = ExtResource("1_v26oa")
+id = &"blood_nova1"
+stack_group = &"blood_nova"
+effect = ExtResource("effect_res")
 title = "Blood Nova 1"
 type = 0
 texture = ExtResource("2_v26oa")

@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_32ucx")
+id = &"teleport_range1"
+stack_group = &"teleport_range"
 title = "Teleport Range 1"
 type = 0
 texture = ExtResource("3_d2euc")
