@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_ovnve")
+id = &"poison_shells1"
+stack_group = &"poison_shells"
 title = "Poison Shells 1"
 type = 0
 texture = ExtResource("3_36hcd")

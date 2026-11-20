@@ -15,13 +15,14 @@ func _ready() -> void:
 	sprite_origin = sprite.position
 	highlight_origin = highlight.position
 
-func move_one_tile(speed_up_factor: float = 1.0) -> void:
-	highlight.global_position = Map.TILEMAP.map_to_local(get_map_position() + direction) + highlight_origin
+## Slides the sprite to `tile`, then snaps the node there.
+func anim_move_to(tile: Vector2i, speed_up_factor: float = 1.0) -> void:
+	highlight.global_position = Map.TILEMAP.map_to_local(tile) + highlight_origin
 	move_tween = create_tween()
 	move_tween.tween_property(
-		sprite, 
-		"global_position", 
-		highlight.global_position - highlight_origin + sprite_origin, 
+		sprite,
+		"global_position",
+		highlight.global_position - highlight_origin + sprite_origin,
 		Globals.get_anim_duration() / speed_up_factor)
 	move_tween.tween_callback(move_end)
 	await move_tween.finished

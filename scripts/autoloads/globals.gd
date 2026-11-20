@@ -1,10 +1,7 @@
 extends Node
 
-var move_mode: Enums.move_mode = Enums.move_mode.WALK
-var turn: int = 0
-var night: int = 1
-var lives: int = 1
-var level: int = 1
+## Skill selected in the UI for the next move (null = walk).
+var selected_ability: MoveAbility = null
 var anim_duration: float = 0.5
 var calculating_turn: bool = false
 
@@ -12,13 +9,7 @@ const sight: int = 7
 const map_sight: Vector2i = Vector2i(15, 15)
 const turns_in_night: int = 50
 
-const destroyed_ennemies_position: Vector2 = Vector2(-10000, -10000)
 
-const bat_cooldown: int = 9
-const werewolf_cooldown: int = 10
-const teleport_cooldown: int = 6
-const time_travel_cooldown: int = 6
-const dash_cooldown: int = 7
 
 func wait(duration_factor: float = 1.0) -> void:
 	await get_tree().create_timer(duration_factor).timeout
@@ -46,12 +37,9 @@ func get_direction_string(direction: Vector2i) -> String:
 			return "NW"
 	return "N"
 
+## Resets presentation/flow state. Run data lives in RunState.
 func reset() -> void:
-	move_mode = Enums.move_mode.WALK
-	turn = 0
-	night = 1
-	lives = 1
-	level = 1
+	selected_ability = null
 	anim_duration = 0.5
 	calculating_turn = false
 

@@ -14,7 +14,6 @@ shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="Artillery" instance=ExtResource("1_yc2uy")]
 script = ExtResource("2_35k1q")
-reload_time = 2
 
 [node name="Sprite" parent="." index="0"]
 material = SubResource("ShaderMaterial_woj6h")

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://data/abstract/enemy_definition.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ennemies/land_mines.tscn" id="2_scene"]
+[ext_resource type="Script" path="res://scripts/sim/behaviours/mine_behaviour.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="behaviour"]
+script = ExtResource("3_behaviour")
+walk_through = true
+
+[resource]
+script = ExtResource("1_script")
+id = &"land_mine"
+display_name = "Land mine"
+scene = ExtResource("2_scene")
+behaviour = SubResource("behaviour")

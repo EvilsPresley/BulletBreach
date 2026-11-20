@@ -106,11 +106,11 @@ func show_lose_banner() -> void:
 	if not LABEL.is_node_ready():
 		await LABEL.ready
 	LABEL.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if Globals.lives > 0:
+	if RunState.lives > 0:
 		LABEL.text = "The light from the sun devours my flesh, I could not find a shelter on time...\n"
 	else:
 		LABEL.text = "I underestimated the human's forces, they were just too many to escape them...\n"
-	LABEL.text += "You died on night %s, turn %s, and reached level %s. Try again!" % [Globals.night, Globals.turn, Globals.level]
+	LABEL.text += "You died on night %s, turn %s, and reached level %s. Try again!" % [RunState.night, RunState.turn, RunState.level]
 	if not MOUSE_ICON.is_node_ready():
 		await MOUSE_ICON.ready
 	MOUSE_ICON.visible = false

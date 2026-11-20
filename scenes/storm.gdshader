@@ -8,6 +8,9 @@ uniform vec2 disp_ = vec2(0.5);
 uniform float speed : hint_range(0.0, 20.0, 0.1) = 3.0;
 uniform vec3 color1 = vec3(0.005,.045,.075);
 uniform vec3 color2 = vec3(0.033,0.07,0.03);
+// Performance: fewer, longer ray-march steps (original: 130 steps, min step 0.09).
+uniform int max_steps : hint_range(16, 130) = 64;
+uniform float min_step : hint_range(0.05, 0.5) = 0.14;
 // Protean clouds by nimitz (twitter: @stormoid)
 // https://www.shadertoy.com/view/3l23Rh
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
@@ -70,9 +73,9 @@ vec4 render( in vec3 ro, in vec3 rd, float time, float prm1, vec2 bsMo )
 	vec3 lpos = vec3(disp(time + ldst)*0.5, time + ldst);
 	float t = 1.5;
 	float fogT = 0.;
-	for(int i=0; i<130; i++)
+	for(int i=0; i<max_steps; i++)
 	{
-		if(rez.a > 0.99)break;
+		if(rez.a > 0.95)break;
 
 		vec3 pos = ro + t*rd;
         vec2 mpv = map(pos, prm1, bsMo);
@@ -86,8 +89,8 @@ vec4 render( in vec3 ro, in vec3 rd, float time, float prm1, vec2 bsMo )
             col = vec4(sin(vec3(5.,0.4,0.2) + mpv.y*0.1 +sin(pos.z*0.4)*0.5 + 1.8)*0.5 + 0.5,0.08);
             col *= den*den*den;
 			col.rgb *= linstep(4.,-2.5, mpv.x)*2.3;
-            float dif =  clamp((den - map(pos+.8, prm1, bsMo).x)/9., 0.001, 1. );
-            dif += clamp((den - map(pos+.35, prm1, bsMo).x)/2.5, 0.001, 1. );
+            // One lighting sample instead of two (each sample = a full noise evaluation).
+            float dif = clamp((den - map(pos+.5, prm1, bsMo).x)/3.5, 0.001, 1. ) * 1.4;
             col.xyz *= den*(color1 + 1.5*color2*dif);
         }
 
@@ -95,7 +98,7 @@ vec4 render( in vec3 ro, in vec3 rd, float time, float prm1, vec2 bsMo )
 		col.rgba += vec4(0.06,0.11,0.11, 0.1)*clamp(fogC-fogT, 0., 1.);
 		fogT = fogC;
 		rez = rez + col*(1. - rez.a);
-		t += clamp(0.5 - dn*dn*.05, 0.09, 0.3);
+		t += clamp(0.5 - dn*dn*.05, min_step, 0.4);
 	}
 	return clamp(rez, 0.0, 1.0);
 }

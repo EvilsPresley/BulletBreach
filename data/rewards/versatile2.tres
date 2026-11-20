@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_hupc0")
+id = &"versatile2"
+stack_group = &"versatile"
 title = "Versatile 2"
 type = 0
 texture = ExtResource("3_hupc0")

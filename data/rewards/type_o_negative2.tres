@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_56lxw")
+id = &"type_o_negative2"
+stack_group = &"type_o_negative"
 title = "Type O Negative 2"
 type = 0
 texture = ExtResource("3_e6y67")

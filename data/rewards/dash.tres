@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://bq5rts4d7e8hk"]
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://bq5rts4d7e8hk"]
 
 [ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_rlm2j"]
 [ext_resource type="Texture2D" uid="uid://cfr0b31jtdmde" path="res://assets/rewards/stallion_dash.png" id="2_rlm2j"]
+[ext_resource type="Resource" path="res://data/abilities/dash.tres" id="ability_res"]
 
 [resource]
 script = ExtResource("1_rlm2j")
+id = &"dash"
+stack_group = &"dash"
+ability = ExtResource("ability_res")
 title = "Stallion Dash"
 type = 2
 texture = ExtResource("2_rlm2j")

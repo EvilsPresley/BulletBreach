@@ -6,6 +6,8 @@
 
 [resource]
 script = ExtResource("1_wqlkp")
+id = &"fly_range1"
+stack_group = &"fly_range"
 title = "Fly Range 1"
 type = 0
 texture = ExtResource("3_apfk3")

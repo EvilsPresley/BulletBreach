@@ -5,10 +5,10 @@ class_name Ui
 
 signal level_up
 
-func _on_player_blood_harvested() -> void:
-	XP_BAR.value += 1 + PlayerRewards.has_reward("Type O Negative") * 0.35
-	if XP_BAR.value >= XP_BAR.max_value:
-		Globals.level += 1
-		XP_BAR.value = 0
-		XP_BAR.max_value = ceil(XP_BAR.max_value * 1.2)
-		level_up.emit()
+func _ready() -> void:
+	RunState.xp_changed.connect(_on_xp_changed)
+	RunState.leveled_up.connect(func(_level): level_up.emit())
+
+func _on_xp_changed(xp: float, xp_to_next: int) -> void:
+	XP_BAR.max_value = xp_to_next
+	XP_BAR.value = xp

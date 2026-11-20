@@ -13,7 +13,6 @@ shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="Tank" instance=ExtResource("1_qrxud")]
 script = ExtResource("2_01nm4")
-reload_time = 1
 
 [node name="Sprite" parent="." index="0"]
 material = SubResource("ShaderMaterial_lbj5m")

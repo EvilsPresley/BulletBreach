@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="TimeTravelAbility" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/time_travel_ability.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"time_travel"
+cooldown = 6

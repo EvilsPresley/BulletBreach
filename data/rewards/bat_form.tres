@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="Reward" load_steps=3 format=3 uid="uid://co6psoom38al8"]
+[gd_resource type="Resource" script_class="Reward" load_steps=4 format=3 uid="uid://co6psoom38al8"]
 
 [ext_resource type="Script" uid="uid://b07l0ks2g8d3b" path="res://data/abstract/reward.gd" id="1_p57l4"]
 [ext_resource type="Texture2D" uid="uid://ebut3l5yjtun" path="res://assets/rewards/bats.png" id="2_p57l4"]
+[ext_resource type="Resource" path="res://data/abilities/bat_form.tres" id="ability_res"]
 
 [resource]
 script = ExtResource("1_p57l4")
+id = &"bat_form"
+stack_group = &"bat_form"
+ability = ExtResource("ability_res")
 title = "Bat Form"
 type = 2
 texture = ExtResource("2_p57l4")

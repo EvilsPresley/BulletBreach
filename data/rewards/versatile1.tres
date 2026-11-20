@@ -5,6 +5,8 @@
 
 [resource]
 script = ExtResource("1_4acic")
+id = &"versatile1"
+stack_group = &"versatile"
 title = "Versatile 1"
 type = 0
 texture = ExtResource("2_4acic")

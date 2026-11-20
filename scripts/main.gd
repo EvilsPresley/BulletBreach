@@ -31,6 +31,7 @@ var church_intro_tuto : bool = true
 var coffin_intro_tuto : bool = true
 
 var free_hand_reward: bool = false
+var game_over: bool = false
 
 func _ready() -> void:
 	_reset()
@@ -71,6 +72,13 @@ func _ready() -> void:
 		await player.ready
 	Map.PLAYER = player
 	
+	player.died.connect(show_defeat)
+	player.blood_harvested.connect(RunState.add_blood)
+	Events.arrow_fired.connect(arrow_fired)
+	Map.board = TURN_MANAGER.build_board()
+	if Atmosphere.is_enabled():
+		add_child(Atmosphere.new())
+	TURN_MANAGER.turn_completed.connect(player.on_turn_completed)
 	player.init_light_fog()
 	player.enable_highlight()
 	init_deep_fog()
@@ -105,22 +113,17 @@ func create_choice_modal(title: String, choices: Array[Reward]) -> void:
 	modal.connect("reward_selected", create_reward_footer)
 	modal.connect("reward_choosen", activate_reward)
 
-func _process(_delta: float) -> void:
-	if Globals.lives <= 0:
-		show_defeat()
-		set_process(false)
-
 func activate_reward(reward: Reward) -> void:
 	await clear_footer()
 	PlayerRewards.activate_reward(reward)
 	REWARDS_UI.update()
 	if reward.type == Enums.reward_type.SKILL:
 		MOVE_BUTTONS.add_move(reward)
-	if Globals.level == 2:
+	if RunState.level == 2:
 		create_tuto(Enums.tuto.MOVE_MODE)
-	elif ((reward.tags.find(Enums.tag.BLOOD) >= 0 and PlayerRewards.has_reward("Hand Of Blood") > 0) \
-	or (reward.tags.find(Enums.tag.POISON) >= 0 and PlayerRewards.has_reward("Hand Of Poison") > 0) \
-	or (reward.tags.find(Enums.tag.SHADOW) >= 0 and PlayerRewards.has_reward("Hand Of Shadow") > 0)) \
+	elif ((reward.tags.find(Enums.tag.BLOOD) >= 0 and PlayerRewards.stacks(&"hand_of_blood") > 0) \
+	or (reward.tags.find(Enums.tag.POISON) >= 0 and PlayerRewards.stacks(&"hand_of_poison") > 0) \
+	or (reward.tags.find(Enums.tag.SHADOW) >= 0 and PlayerRewards.stacks(&"hand_of_shadow") > 0)) \
 	and !free_hand_reward:
 		free_hand_reward = true
 		create_choice_modal("Free reward!", PlayerRewards.get_level_up_rewards())
@@ -140,6 +143,9 @@ func _enable_play() -> void:
 	Map.PLAYER.update_oracle()
 
 func show_defeat() -> void:
+	if game_over:
+		return
+	game_over = true
 	clear_footer()
 	for child in MODAL.get_children():
 		child.queue_free()
@@ -153,14 +159,16 @@ func _reset() -> void:
 	arrow_tuto = true
 	almost_day_tuto = true
 	free_hand_reward = false
+	game_over = false
 	church_intro_tuto = true
 	coffin_intro_tuto = true
 	Globals.reset()
+	RunState.reset()
 
 func _on_ui_level_up() -> void:
 	await clear_modals()
-	LEVEL_LABEL.text = "LEVEL %s" % Globals.level
-	if Globals.level == 2:
+	LEVEL_LABEL.text = "LEVEL %s" % RunState.level
+	if RunState.level == 2:
 		var banner: Banner = await create_tuto(Enums.tuto.POWER_GROWS)
 		banner.connect("tree_exited", create_choice_modal.bind("Level up!", PlayerRewards.get_level_up_rewards()))
 	else:
@@ -270,20 +278,19 @@ func arrow_fired() -> void:
 		create_tuto(Enums.tuto.FRIENDLY_FIRE)
 
 func _on_player_turn_complete() -> void:
-	Globals.turn += 1
-	DAY_BAR.value = Globals.turn
-	if Globals.turn == 2 and Globals.night == 1:
+	RunState.turn += 1
+	DAY_BAR.value = RunState.turn
+	if RunState.turn == 2 and RunState.night == 1:
 		create_tuto(Enums.tuto.DAY_NIGHT_CYCLE)
 		DAY_BAR_CONTAINER.visible = true
-	if Globals.turn >= Globals.turns_in_night:
+	if RunState.turn >= Globals.turns_in_night:
 		show_defeat()
-		set_process(false)
-	elif Globals.turn >= Globals.turns_in_night * .9:
+	elif RunState.turn >= Globals.turns_in_night * .9:
 		if almost_day_tuto:
 			almost_day_tuto = false
 			create_tuto(Enums.tuto.ALMOST_DAY)
 		DAY_BAR.modulate = Colors.RED
-	elif Globals.turn >= Globals.turns_in_night * .8:
+	elif RunState.turn >= Globals.turns_in_night * .8:
 		DAY_BAR.modulate = Colors.GOLD
 	if church_intro_tuto:
 		if player.get_map_position().x + player.get_map_position().y >= 6:
@@ -310,33 +317,27 @@ func _on_player_enter_coffin() -> void:
 	modal.set_text("""
 Rest in this coffin for the day?
 You have %s turns remaining this night, before sunset.
-""" % (Globals.turns_in_night - Globals.turn))
+""" % (Globals.turns_in_night - RunState.turn))
 	modal.connect("yes_clicked", _rest_in_coffin)
 
 func _rest_in_coffin() -> void:
 	var tween = create_tween()
-	tween.tween_property(
-		GLOBAL_OVERLAY, 
-		"color", 
-		Colors.BLACK,
-		Globals.get_anim_duration() * 3)
-	for ennemy: Ennemy in Map.ENNEMIES.get_children():
-		ennemy.queue_free()
-	Globals.night += 1
-	Globals.turn = 1
+	tween.tween_property(GLOBAL_OVERLAY, "color", Colors.BLACK, Globals.get_anim_duration() * 3)
 	Globals.calculating_turn = true
-	DAY_BAR.value = Globals.turn
-	DAY_BAR_LABEL.text = "NIGHT " + str(Globals.night)
-	tween.tween_property(
-		GLOBAL_OVERLAY, 
-		"color", 
-		Color.TRANSPARENT,
-		Globals.get_anim_duration() * 3)
 	await tween.finished
-	await TURN_MANAGER.spawn(Globals.night * 3)
+	await TURN_MANAGER.start_new_night()
+	DAY_BAR.value = RunState.turn
+	DAY_BAR_LABEL.text = "NIGHT " + str(RunState.night)
+	tween = create_tween()
+	tween.tween_property(GLOBAL_OVERLAY, "color", Color.TRANSPARENT, Globals.get_anim_duration() * 3)
+	await tween.finished
+	Globals.calculating_turn = false
 	var banner: Banner = await create_tuto(Enums.tuto.NEW_DAY)
 	banner.connect("tree_exited", create_choice_modal.bind("New active skill", PlayerRewards._get_level_up_skills()))
-	Globals.calculating_turn = false
-	for prop: Prop in Map.PROPS.get_children():
-		if prop.get_map_position() == Map.PLAYER.get_map_position():
-			prop.queue_free()
+
+## Undo the last move (U key or Ctrl+Z).
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and !event.echo \
+	and (event.keycode == KEY_U or (event.keycode == KEY_Z and event.ctrl_pressed)):
+		if !is_ui_blocking() and TURN_MANAGER.undo_last_turn():
+			DAY_BAR.value = RunState.turn

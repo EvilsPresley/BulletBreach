@@ -8,19 +8,25 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="BulletBreach"
 run/main_scene="uid://dcqyp4vbobqjj"
-config/features=PackedStringArray("4.4", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
+Events="*res://scripts/autoloads/events.gd"
 Globals="*res://scripts/autoloads/globals.gd"
 Map="*res://scripts/autoloads/map.gd"
 Enums="*res://scripts/autoloads/enums.gd"
 Colors="*res://scripts/autoloads/colors.gd"
 PlayerRewards="*res://scripts/autoloads/player_rewards.gd"
+RunState="*res://scripts/autoloads/run_state.gd"
 CurveTween="*res://scripts/autoloads/curve_tween.gd"
 SceneLoader="*res://scenes/scene_loader.tscn"
 

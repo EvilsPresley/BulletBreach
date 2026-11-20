@@ -1,14 +1,5 @@
 extends Node
 
-enum move_mode {
-	WALK,
-	TELEPORT,
-	DASH,
-	TIME_TRAVEL,
-	FLY,
-	WEREWOLF,
-}
-
 enum plan {
 	SHOOT,
 	STAND,

@@ -2,7 +2,8 @@ extends Control
 class_name Menu
 
 @onready var ABOUT: Button = $AboutButton
-@onready var STORM: ColorRect = $Storm
+## Clouds are rendered at 1/4 resolution in a SubViewport (see menu.tscn).
+@onready var STORM: Control = $Storm
 
 func _on_play_button_pressed() -> void:
 	await SceneLoader.load_scene("main")
