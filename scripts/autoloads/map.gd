@@ -27,6 +27,8 @@ var DEEP_FOG: Control = null
 
 ## Authoritative state of the current night.
 var board: Board
+## Optional lighting layer (scripts/visual/atmosphere.gd), null if disabled.
+var atmosphere: Node = null
 
 var _poison_markers: Dictionary = {}  # Vector2i -> Array[TextureRect]
 
@@ -63,6 +65,8 @@ func update_fog() -> void:
 ## (faded out by shadow attacks). Purely cosmetic: damage is already resolved.
 func play_tile_effect(tile: Vector2i, type: Enums.destruction_type, targets: Array = []) -> void:
 	var anim_duration: float = Globals.get_anim_duration()
+	if atmosphere:
+		atmosphere.flash(tile, type)
 	match type:
 		Enums.destruction_type.FLAMES:
 			var flames: Array[TextureRect] = []

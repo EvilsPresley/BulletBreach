@@ -76,6 +76,8 @@ func _ready() -> void:
 	player.blood_harvested.connect(RunState.add_blood)
 	Events.arrow_fired.connect(arrow_fired)
 	Map.board = TURN_MANAGER.build_board()
+	if Atmosphere.is_enabled():
+		add_child(Atmosphere.new())
 	TURN_MANAGER.turn_completed.connect(player.on_turn_completed)
 	player.init_light_fog()
 	player.enable_highlight()

@@ -15,7 +15,12 @@ func _ready() -> void:
 	# grant a skill so the UI shows buttons, walk a few turns
 	await main.activate_reward(load("res://data/rewards/teleport.tres"))
 	await main.activate_reward(load("res://data/rewards/dash.tres"))
-	for i in 6:
+	var turns := 6
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--turns="): turns = arg.trim_prefix("--turns=").to_int()
+	Engine.time_scale = 8.0
+	get_window().size = Vector2i(256, 144)
+	for i in turns:
 		await _clear()
 		var p: Player = Map.PLAYER
 		var tiles := []
@@ -27,6 +32,13 @@ func _ready() -> void:
 			for c in main.MODAL.get_children(): c.queue_free()
 			await get_tree().process_frame
 			if !main.TURN_MANAGER.is_busy() and !Globals.calculating_turn: break
+	Engine.time_scale = 1.0
+	get_window().size = Vector2i(1024, 576)
+	# --light-at-end: play unlit (fast in software rendering), light the final frame.
+	if OS.get_cmdline_user_args().has("--light-at-end"):
+		main.add_child(Atmosphere.new())
+		for i in 20: await get_tree().process_frame
+	for i in 10: await get_tree().process_frame
 	await _clear()
 	await _shot(out + "/02_after_turns.png")
 	get_tree().quit()
