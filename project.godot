@@ -26,6 +26,7 @@ Map="*res://scripts/autoloads/map.gd"
 Enums="*res://scripts/autoloads/enums.gd"
 Colors="*res://scripts/autoloads/colors.gd"
 PlayerRewards="*res://scripts/autoloads/player_rewards.gd"
+RunState="*res://scripts/autoloads/run_state.gd"
 CurveTween="*res://scripts/autoloads/curve_tween.gd"
 SceneLoader="*res://scenes/scene_loader.tscn"
 

@@ -73,6 +73,7 @@ func _ready() -> void:
 	Map.PLAYER = player
 	
 	player.died.connect(show_defeat)
+	player.blood_harvested.connect(RunState.add_blood)
 	Events.arrow_fired.connect(arrow_fired)
 	player.init_light_fog()
 	player.enable_highlight()
@@ -114,7 +115,7 @@ func activate_reward(reward: Reward) -> void:
 	REWARDS_UI.update()
 	if reward.type == Enums.reward_type.SKILL:
 		MOVE_BUTTONS.add_move(reward)
-	if Globals.level == 2:
+	if RunState.level == 2:
 		create_tuto(Enums.tuto.MOVE_MODE)
 	elif ((reward.tags.find(Enums.tag.BLOOD) >= 0 and PlayerRewards.stacks(&"hand_of_blood") > 0) \
 	or (reward.tags.find(Enums.tag.POISON) >= 0 and PlayerRewards.stacks(&"hand_of_poison") > 0) \
@@ -158,11 +159,12 @@ func _reset() -> void:
 	church_intro_tuto = true
 	coffin_intro_tuto = true
 	Globals.reset()
+	RunState.reset()
 
 func _on_ui_level_up() -> void:
 	await clear_modals()
-	LEVEL_LABEL.text = "LEVEL %s" % Globals.level
-	if Globals.level == 2:
+	LEVEL_LABEL.text = "LEVEL %s" % RunState.level
+	if RunState.level == 2:
 		var banner: Banner = await create_tuto(Enums.tuto.POWER_GROWS)
 		banner.connect("tree_exited", create_choice_modal.bind("Level up!", PlayerRewards.get_level_up_rewards()))
 	else:
@@ -272,19 +274,19 @@ func arrow_fired() -> void:
 		create_tuto(Enums.tuto.FRIENDLY_FIRE)
 
 func _on_player_turn_complete() -> void:
-	Globals.turn += 1
-	DAY_BAR.value = Globals.turn
-	if Globals.turn == 2 and Globals.night == 1:
+	RunState.turn += 1
+	DAY_BAR.value = RunState.turn
+	if RunState.turn == 2 and RunState.night == 1:
 		create_tuto(Enums.tuto.DAY_NIGHT_CYCLE)
 		DAY_BAR_CONTAINER.visible = true
-	if Globals.turn >= Globals.turns_in_night:
+	if RunState.turn >= Globals.turns_in_night:
 		show_defeat()
-	elif Globals.turn >= Globals.turns_in_night * .9:
+	elif RunState.turn >= Globals.turns_in_night * .9:
 		if almost_day_tuto:
 			almost_day_tuto = false
 			create_tuto(Enums.tuto.ALMOST_DAY)
 		DAY_BAR.modulate = Colors.RED
-	elif Globals.turn >= Globals.turns_in_night * .8:
+	elif RunState.turn >= Globals.turns_in_night * .8:
 		DAY_BAR.modulate = Colors.GOLD
 	if church_intro_tuto:
 		if player.get_map_position().x + player.get_map_position().y >= 6:
@@ -311,7 +313,7 @@ func _on_player_enter_coffin() -> void:
 	modal.set_text("""
 Rest in this coffin for the day?
 You have %s turns remaining this night, before sunset.
-""" % (Globals.turns_in_night - Globals.turn))
+""" % (Globals.turns_in_night - RunState.turn))
 	modal.connect("yes_clicked", _rest_in_coffin)
 
 func _rest_in_coffin() -> void:
@@ -323,18 +325,18 @@ func _rest_in_coffin() -> void:
 		Globals.get_anim_duration() * 3)
 	for ennemy: Ennemy in Map.ENNEMIES.get_children():
 		ennemy.queue_free()
-	Globals.night += 1
-	Globals.turn = 1
+	RunState.night += 1
+	RunState.turn = 1
 	Globals.calculating_turn = true
-	DAY_BAR.value = Globals.turn
-	DAY_BAR_LABEL.text = "NIGHT " + str(Globals.night)
+	DAY_BAR.value = RunState.turn
+	DAY_BAR_LABEL.text = "NIGHT " + str(RunState.night)
 	tween.tween_property(
 		GLOBAL_OVERLAY, 
 		"color", 
 		Color.TRANSPARENT,
 		Globals.get_anim_duration() * 3)
 	await tween.finished
-	await TURN_MANAGER.spawn(Globals.night * 3)
+	await TURN_MANAGER.spawn(RunState.night * 3)
 	var banner: Banner = await create_tuto(Enums.tuto.NEW_DAY)
 	banner.connect("tree_exited", create_choice_modal.bind("New active skill", PlayerRewards._get_level_up_skills()))
 	Globals.calculating_turn = false

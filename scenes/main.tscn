@@ -1072,7 +1072,6 @@ script = ExtResource("20_gqmmt")
 
 [connection signal="first_spawn" from="Managers/TurnManager" to="." method="_on_turn_manager_first_spawn"]
 [connection signal="turn_completed" from="Managers/TurnManager" to="Entities/Player" method="_on_turn_manager_turn_completed"]
-[connection signal="blood_harvested" from="Entities/Player" to="Ui" method="_on_player_blood_harvested"]
 [connection signal="church_exhausted" from="Entities/Player" to="." method="_on_player_church_exhausted"]
 [connection signal="enter_coffin" from="Entities/Player" to="." method="_on_player_enter_coffin"]
 [connection signal="sun_exhausted" from="Entities/Player" to="." method="_on_player_sun_exhausted"]

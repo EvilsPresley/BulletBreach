@@ -47,11 +47,29 @@ func _ready() -> void:
 		await main.activate_reward(load("res://data/rewards/%s.tres" % r))
 	print("CHECK rewards owned: %s, skill buttons: %d, effects: %s" % [PlayerRewards.owned_rewards.size(), main.MOVE_BUTTONS.get_child_count(), PlayerRewards.get_effects().map(func(e): return [e.effect.resource_path.get_file(), e.stacks])])
 
-	# 3. Play turns.
+	# 3. Play turns, rest in a coffin, play a second night.
+	await _play_turns(TURNS)
+	await _settle()
+	await main._rest_in_coffin()
+	await _settle()
+	print("CHECK coffin rest: night=%d turn=%d enemies=%d" % [RunState.night, RunState.turn, Map.ENNEMIES.get_child_count()])
+	await _play_turns(8)
+
+	# 4. Death signal.
+	await _settle()
+	RunState.lives = 1
+	await player.get_hit()
+	await get_tree().create_timer(1.0).timeout
+	print("CHECK run state: level=%d xp=%.2f/%d cooldowns=%s" % [RunState.level, RunState.xp, RunState.xp_to_next, RunState.cooldowns.keys().map(func(a): return "%s:%d" % [a.id, RunState.cooldowns[a]])])
+	print("CHECK death -> game_over=%s" % main.game_over)
+	print("SMOKE TEST DONE errors=%d" % errors)
+	get_tree().quit()
+
+func _play_turns(count: int) -> void:
 	var modes_used := {}
-	for i in TURNS:
+	for i in count:
 		await _settle()
-		Globals.lives = 99
+		RunState.lives = 99
 		Globals.selected_ability = _pick_ability()
 		var tiles := _candidate_tiles()
 		if tiles.is_empty():
@@ -64,25 +82,22 @@ func _ready() -> void:
 		var pick: Vector2i = (safe if !safe.is_empty() else tiles).pick_random()
 		var used: String = String(player.get_active_ability().id) if player.get_active_ability().id else player.get_active_ability().get_script().get_global_name()
 		turn_done = false
+		var used_ability: MoveAbility = Globals.selected_ability
 		var ok: bool = await player.try_act(pick)
 		if !ok:
 			print("TURN %d: try_act refused %s on %s" % [i, used, pick]); errors += 1
 			continue
 		await _wait_turn()
+		if used_ability:
+			var expected_min: int = used_ability.cooldown - PlayerRewards.stacks(&"haste")
+			if RunState.get_cooldown(used_ability) < expected_min - 1 or Globals.selected_ability != null:
+				print("WARN cooldown not applied for %s: %d" % [used_ability.id, RunState.get_cooldown(used_ability)]); errors += 1
 		modes_used[used] = modes_used.get(used, 0) + 1
-		print("TURN %2d %-11s enemies=%2d civilians=%d buildings=%d level=%d" % [Globals.turn, used,
+		print("TURN %2d %-11s enemies=%2d civilians=%d buildings=%d level=%d" % [RunState.turn, used,
 			Map.ENNEMIES.get_child_count(), Map.CIVILIANS.get_child_count(),
-			Map.BUILDINGS.get_child_count(), Globals.level])
+			Map.BUILDINGS.get_child_count(), RunState.level])
 	print("CHECK abilities used: %s" % modes_used)
 
-	# 4. Death signal.
-	await _settle()
-	Globals.lives = 1
-	await player.get_hit()
-	await get_tree().create_timer(1.0).timeout
-	print("CHECK death -> game_over=%s" % main.game_over)
-	print("SMOKE TEST DONE errors=%d" % errors)
-	get_tree().quit()
 
 func _pick_ability() -> MoveAbility:
 	if player.fly_duration > 0 or randf() < 0.5:

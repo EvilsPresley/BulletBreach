@@ -76,6 +76,7 @@ func _move_start(target: Vector2i) -> void:
 	moving = true
 	update_oracle()
 	Events.player_move_started.emit(Globals.selected_ability, fly_duration > 0)
+	Globals.selected_ability = null
 	await _harvest_blood(target)
 
 func can_werewolf_to(target: Vector2i) -> bool:
@@ -493,8 +494,8 @@ func get_hit() -> void:
 			await Globals.wait(Globals.get_anim_duration() * .25)
 			sprite.texture = preload("res://assets/player/vampire.png")
 			return
-	Globals.lives -= 1
-	if Globals.lives <= 0:
+	RunState.lives -= 1
+	if RunState.lives <= 0:
 		died.emit()
 
 func _update_oracle_on_tile(tile: Vector2i) -> void:
@@ -686,7 +687,7 @@ func verify_church_exhausted() -> void:
 		Globals.selected_ability = null
 
 func verify_sun_exhausted() -> void:
-	if Globals.turn >= Globals.turns_in_night * .9\
+	if RunState.turn >= Globals.turns_in_night * .9\
 	and PlayerRewards.stacks(&"moon_orb") <= 0:
 		sun_exhausted.emit()
 		Globals.selected_ability = null

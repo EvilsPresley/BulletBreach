@@ -21,7 +21,7 @@ func activate_reward(reward: Reward) -> void:
 		owned_rewards.append(reward)
 
 func get_level_up_rewards() -> Array[Reward]:
-	if Globals.level == 2:
+	if RunState.level == 2:
 		return _get_level_up_skills(5)
 	else:
 		return _get_level_up_upgrades()

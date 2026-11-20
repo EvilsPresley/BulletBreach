@@ -1,26 +1,6 @@
 extends Control
 class_name MoveButtons
 
-func _ready() -> void:
-	Events.player_move_started.connect(func(_mode, is_flying): apply_move(is_flying))
-	Events.cooldowns_reduced.connect(haste)
-
-func apply_move(is_flying: bool) -> void:
-	for child: Node in get_children():
-		for button: MoveButton in child.get_children():
-			if button.ability == Globals.selected_ability:
-				button.set_max_reload()
-			else:
-				if !is_flying:
-					button.reload_one()
-	Globals.selected_ability = null
-
-func haste(number_of_turns: int) -> void:
-	for i in number_of_turns:
-		for child: Node in get_children():
-			for button: MoveButton in child.get_children():
-				button.reload_one()
-	
 func add_move(skill: Reward) -> void:
 	var child_count: int = get_child_count()
 	
@@ -31,7 +11,7 @@ func add_move(skill: Reward) -> void:
 	
 	var move_button: MoveButton = preload("res://scenes/ui/move_button.tscn").instantiate()
 	move_button.ability = skill.ability
-	move_button.reload_time = skill.ability.cooldown
+	RunState.register_ability(skill.ability)
 	move_button.texture = skill.texture
 	move_button.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	frame.add_child(move_button)

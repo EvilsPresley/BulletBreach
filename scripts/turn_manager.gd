@@ -53,9 +53,9 @@ func _on_player_turn_complete() -> void:
 		await Globals.wait(Globals.anim_duration * .25)
 	await Globals.wait_one_frame()
 	await take_turn()
-	if Globals.night >= 2 or Globals.turn >= 20:
-		await spawn(Globals.night)
-	elif Globals.turn % 2 == 0 and Globals.turn > 2:
+	if RunState.night >= 2 or RunState.turn >= 20:
+		await spawn(RunState.night)
+	elif RunState.turn % 2 == 0 and RunState.turn > 2:
 		await spawn(1)
 	turn_completed.emit()
 

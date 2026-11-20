@@ -7,42 +7,24 @@ class_name  MoveButton
 
 ## Ability selected by this button (null = walk).
 @export var ability: MoveAbility
-@export var reload_time: int = 0
-
 func _ready() -> void:
-	set_reload_time(reload_time)
-	RELOAD.value = 0
+	RELOAD.visible = ability != null and ability.cooldown > 0
+	if RELOAD.visible:
+		RELOAD.max_value = ability.cooldown
+	RunState.cooldowns_changed.connect(_refresh)
+	_refresh()
 
 func _process(_delta: float) -> void:
-	if Globals.selected_ability == ability:
-		SELECTION.visible = true
-	else:
-		SELECTION.visible = false
+	SELECTION.visible = Globals.selected_ability == ability
 
-func set_reload_time(max_value: int) -> void:
-	if max_value > 0:
-		RELOAD.max_value = max_value
-	else:
-		RELOAD.max_value = 1
-		RELOAD.visible = false
+func _refresh() -> void:
+	var remaining: int = get_reload()
+	RELOAD.value = remaining
+	self_modulate.a = 0.5 if remaining > 0 else 1.0
 
-func set_max_reload() -> void:
-	RELOAD.value = reload_time
-	if RELOAD.value > 0:
-		_disable()
-
+## Remaining cooldown turns (0 = ready).
 func get_reload() -> int:
-	if RELOAD.visible:
-		return floor(RELOAD.value)
-	else:
-		return 0
-
-func reload_one() -> void:
-	if RELOAD.visible:
-		if get_reload() > 0:
-			RELOAD.value -= 1
-			if get_reload() <= 0:
-				_enable()
+	return RunState.get_cooldown(ability) if ability else 0
 
 func _on_mouse_entered() -> void:
 	HIGHLIGHT.visible = true
@@ -53,7 +35,7 @@ func _on_mouse_exited() -> void:
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			if Globals.selected_ability == ability or self_modulate.a < 1:
+			if Globals.selected_ability == ability or !RunState.is_ready(ability):
 				Globals.selected_ability = null
 			else:
 				Globals.selected_ability = ability
@@ -62,8 +44,3 @@ func _on_gui_input(event: InputEvent) -> void:
 					Map.PLAYER.verify_sun_exhausted()
 			Map.PLAYER.update_oracle()
 			
-func _disable() -> void:
-	self_modulate.a = 0.5
-
-func _enable() -> void:
-	self_modulate.a = 1
