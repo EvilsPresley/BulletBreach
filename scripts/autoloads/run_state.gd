@@ -82,3 +82,20 @@ func reduce_cooldowns(turns: int) -> void:
 	for ability: MoveAbility in cooldowns:
 		cooldowns[ability] = maxi(0, cooldowns[ability] - turns)
 	cooldowns_changed.emit()
+
+# --- Snapshots (undo) ------------------------------------------------------------------
+
+func snapshot() -> Dictionary:
+	return {"night": night, "turn": turn, "lives": lives, "level": level,
+		"xp": xp, "xp_to_next": xp_to_next, "cooldowns": cooldowns.duplicate()}
+
+func restore(data: Dictionary) -> void:
+	night = data.night
+	turn = data.turn
+	lives = data.lives
+	level = data.level
+	xp = data.xp
+	xp_to_next = data.xp_to_next
+	cooldowns = data.cooldowns.duplicate()
+	xp_changed.emit(xp, xp_to_next)
+	cooldowns_changed.emit()

@@ -25,5 +25,5 @@ func _physics_process(delta: float) -> void:
 		position = tile_map_layer.map_to_local(current_mouse_position) - size * .5 + Vector2(0, -1)
 	
 	if Map.PLAYER:
-		if !Map.PLAYER.get_active_ability().can_target(Map.PLAYER, current_mouse_position):
+		if Map.board == null or !Map.PLAYER.get_active_ability().can_target(Map.board, current_mouse_position):
 			visible = false

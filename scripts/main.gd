@@ -75,6 +75,8 @@ func _ready() -> void:
 	player.died.connect(show_defeat)
 	player.blood_harvested.connect(RunState.add_blood)
 	Events.arrow_fired.connect(arrow_fired)
+	Map.board = TURN_MANAGER.build_board()
+	TURN_MANAGER.turn_completed.connect(player.on_turn_completed)
 	player.init_light_fog()
 	player.enable_highlight()
 	init_deep_fog()
@@ -318,28 +320,22 @@ You have %s turns remaining this night, before sunset.
 
 func _rest_in_coffin() -> void:
 	var tween = create_tween()
-	tween.tween_property(
-		GLOBAL_OVERLAY, 
-		"color", 
-		Colors.BLACK,
-		Globals.get_anim_duration() * 3)
-	for ennemy: Ennemy in Map.ENNEMIES.get_children():
-		ennemy.queue_free()
-	RunState.night += 1
-	RunState.turn = 1
+	tween.tween_property(GLOBAL_OVERLAY, "color", Colors.BLACK, Globals.get_anim_duration() * 3)
 	Globals.calculating_turn = true
+	await tween.finished
+	await TURN_MANAGER.start_new_night()
 	DAY_BAR.value = RunState.turn
 	DAY_BAR_LABEL.text = "NIGHT " + str(RunState.night)
-	tween.tween_property(
-		GLOBAL_OVERLAY, 
-		"color", 
-		Color.TRANSPARENT,
-		Globals.get_anim_duration() * 3)
+	tween = create_tween()
+	tween.tween_property(GLOBAL_OVERLAY, "color", Color.TRANSPARENT, Globals.get_anim_duration() * 3)
 	await tween.finished
-	await TURN_MANAGER.spawn(RunState.night * 3)
+	Globals.calculating_turn = false
 	var banner: Banner = await create_tuto(Enums.tuto.NEW_DAY)
 	banner.connect("tree_exited", create_choice_modal.bind("New active skill", PlayerRewards._get_level_up_skills()))
-	Globals.calculating_turn = false
-	for prop: Prop in Map.PROPS.get_children():
-		if prop.get_map_position() == Map.PLAYER.get_map_position():
-			prop.queue_free()
+
+## Undo the last move (U key or Ctrl+Z).
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and !event.echo \
+	and (event.keycode == KEY_U or (event.keycode == KEY_Z and event.ctrl_pressed)):
+		if !is_ui_blocking() and TURN_MANAGER.undo_last_turn():
+			DAY_BAR.value = RunState.turn

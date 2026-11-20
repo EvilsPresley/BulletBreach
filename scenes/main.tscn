@@ -1071,12 +1071,10 @@ grow_horizontal = 0
 script = ExtResource("20_gqmmt")
 
 [connection signal="first_spawn" from="Managers/TurnManager" to="." method="_on_turn_manager_first_spawn"]
-[connection signal="turn_completed" from="Managers/TurnManager" to="Entities/Player" method="_on_turn_manager_turn_completed"]
 [connection signal="church_exhausted" from="Entities/Player" to="." method="_on_player_church_exhausted"]
 [connection signal="enter_coffin" from="Entities/Player" to="." method="_on_player_enter_coffin"]
 [connection signal="sun_exhausted" from="Entities/Player" to="." method="_on_player_sun_exhausted"]
 [connection signal="turn_complete" from="Entities/Player" to="." method="_on_player_turn_complete"]
-[connection signal="turn_complete" from="Entities/Player" to="Managers/TurnManager" method="_on_player_turn_complete"]
 [connection signal="level_up" from="Ui" to="." method="_on_ui_level_up"]
 [connection signal="mouse_entered" from="Ui/123" to="Ui/123" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Ui/123" to="Ui/123" method="_on_mouse_exited"]

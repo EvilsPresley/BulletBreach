@@ -9,7 +9,6 @@ const sight: int = 7
 const map_sight: Vector2i = Vector2i(15, 15)
 const turns_in_night: int = 50
 
-const destroyed_ennemies_position: Vector2 = Vector2(-10000, -10000)
 
 
 func wait(duration_factor: float = 1.0) -> void:

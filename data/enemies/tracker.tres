@@ -1,10 +1,19 @@
-[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="EnemyDefinition" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://data/abstract/enemy_definition.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/ennemies/mine_layer.tscn" id="2_scene"]
+[ext_resource type="Script" path="res://scripts/sim/behaviours/tracker_behaviour.gd" id="3_behaviour"]
+[ext_resource type="Resource" path="res://data/enemies/land_mine.tres" id="4_mine"]
+
+[sub_resource type="Resource" id="behaviour"]
+script = ExtResource("3_behaviour")
+mine = ExtResource("4_mine")
 
 [resource]
 script = ExtResource("1_script")
 id = &"tracker"
 display_name = "Tracker"
 scene = ExtResource("2_scene")
+behaviour = SubResource("behaviour")
+reload_time = 2
+intro_tuto = 12
