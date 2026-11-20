@@ -31,6 +31,7 @@ var church_intro_tuto : bool = true
 var coffin_intro_tuto : bool = true
 
 var free_hand_reward: bool = false
+var game_over: bool = false
 
 func _ready() -> void:
 	_reset()
@@ -71,6 +72,7 @@ func _ready() -> void:
 		await player.ready
 	Map.PLAYER = player
 	
+	player.died.connect(show_defeat)
 	player.init_light_fog()
 	player.enable_highlight()
 	init_deep_fog()
@@ -105,11 +107,6 @@ func create_choice_modal(title: String, choices: Array[Reward]) -> void:
 	modal.connect("reward_selected", create_reward_footer)
 	modal.connect("reward_choosen", activate_reward)
 
-func _process(_delta: float) -> void:
-	if Globals.lives <= 0:
-		show_defeat()
-		set_process(false)
-
 func activate_reward(reward: Reward) -> void:
 	await clear_footer()
 	PlayerRewards.activate_reward(reward)
@@ -140,6 +137,9 @@ func _enable_play() -> void:
 	Map.PLAYER.update_oracle()
 
 func show_defeat() -> void:
+	if game_over:
+		return
+	game_over = true
 	clear_footer()
 	for child in MODAL.get_children():
 		child.queue_free()
@@ -153,6 +153,7 @@ func _reset() -> void:
 	arrow_tuto = true
 	almost_day_tuto = true
 	free_hand_reward = false
+	game_over = false
 	church_intro_tuto = true
 	coffin_intro_tuto = true
 	Globals.reset()
@@ -277,7 +278,6 @@ func _on_player_turn_complete() -> void:
 		DAY_BAR_CONTAINER.visible = true
 	if Globals.turn >= Globals.turns_in_night:
 		show_defeat()
-		set_process(false)
 	elif Globals.turn >= Globals.turns_in_night * .9:
 		if almost_day_tuto:
 			almost_day_tuto = false

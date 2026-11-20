@@ -64,19 +64,7 @@ func _move() -> void:
 	var pos_dif: Vector2i = Map.PLAYER.get_map_position() - get_map_position()
 	if Map.cardinals.find(pos_dif) >= 0:
 		return
-		
-	var hls: Array[TextureRect]
-	for dir: Vector2i in Map.get_similar_directions(Map.vector_to_cardinal(pos_dif), false):
-		var hl: TextureRect = TextureRect.new()
-		hls.append(hl)
-		hl.texture = preload("res://assets/map/hl_test.png")
-		add_child(hl)
-		hl.modulate = Color.ORANGE
-		hl.global_position = Map.get_global_position(get_map_position() + dir) - hl.size * .5
-	await Globals.wait(.5)
-	for hl in hls:
-		hl.queue_free()
-		
+
 	for dir: Vector2i in Map.get_similar_directions(Map.vector_to_cardinal(pos_dif), false):
 		if Map.can_ennemy_move(get_map_position() + dir) \
 		and _can_attack(get_map_position() + dir, Map.PLAYER.get_map_position()):

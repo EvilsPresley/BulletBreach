@@ -7,7 +7,6 @@ var was_special_move: bool = false
 var previous_positions: Array[Vector2i] = []
 var fly_duration: int = 0
 var flight_height: int = 6
-var experience: int = 0
 var sanguine_pool_use: int = 0
 
 @onready var MOVE_BUTTONS: MoveButtons = $"../../Ui/MoveButtons"
@@ -22,6 +21,7 @@ signal blood_harvested
 signal church_exhausted
 signal sun_exhausted
 signal enter_coffin
+signal died
 
 func intro() -> void:
 	sprite.position = Vector2(25, -96)
@@ -35,42 +35,63 @@ func intro() -> void:
 	)
 	await tween.finished
 
-func _process(_delta) -> void:
-	if _can_act():
-		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			var mouse_position = Map.get_map_position(get_global_mouse_position())
-			if fly_duration > 0:
-				if can_fly_to(mouse_position):
-					await _move_start(mouse_position)
-					await fly_to(mouse_position)
-			match Globals.move_mode:
-				Enums.move_mode.WALK:
-					if can_walk_to(mouse_position):
-						await _move_start(mouse_position)
-						await walk_to(mouse_position)
-				Enums.move_mode.TELEPORT:
-					if can_teleport_to(mouse_position):
-						await _move_start(mouse_position)
-						await teleport_to(mouse_position)
-				Enums.move_mode.TIME_TRAVEL:
-					if can_time_travel_to(mouse_position):
-						await _move_start(mouse_position)
-						await time_travel_to(mouse_position)
-				Enums.move_mode.FLY:
-					if can_fly_to(mouse_position):
-						await _move_start(mouse_position)
-						await take_off()
-						await fly_to(mouse_position)
-				Enums.move_mode.WEREWOLF:
-					if can_werewolf_to(mouse_position):
-						await _move_start(mouse_position)
-						await werewolf_to(mouse_position)
-				Enums.move_mode.DASH:
-					if can_dash_to(mouse_position):
-						await _move_start(mouse_position)
-						await dash_to(mouse_position)
-				_:
-					push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
+func _input(event: InputEvent) -> void:
+	# Single click (not "button held"), ignored when the cursor is over the UI layer.
+	if event is InputEventMouseButton \
+	and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var hovered: Control = get_viewport().gui_get_hovered_control()
+		if hovered and MAIN.canvas_layer.is_ancestor_of(hovered):
+			return
+		var world_position: Vector2 = get_canvas_transform().affine_inverse() * event.position
+		try_act(Map.get_map_position(world_position))
+
+## Tries to act on the given tile with the current move mode.
+## Returns true if a move was performed. Also used by the headless smoke test.
+func try_act(tile: Vector2i) -> bool:
+	if !_can_act():
+		return false
+	if fly_duration > 0:
+		if !can_fly_to(tile):
+			return false
+		await _move_start(tile)
+		await fly_to(tile)
+		return true
+	match Globals.move_mode:
+		Enums.move_mode.WALK:
+			if !can_walk_to(tile):
+				return false
+			await _move_start(tile)
+			await walk_to(tile)
+		Enums.move_mode.TELEPORT:
+			if !can_teleport_to(tile):
+				return false
+			await _move_start(tile)
+			await teleport_to(tile)
+		Enums.move_mode.TIME_TRAVEL:
+			if !can_time_travel_to(tile):
+				return false
+			await _move_start(tile)
+			await time_travel_to(tile)
+		Enums.move_mode.FLY:
+			if !can_fly_to(tile):
+				return false
+			await _move_start(tile)
+			await take_off()
+			await fly_to(tile)
+		Enums.move_mode.WEREWOLF:
+			if !can_werewolf_to(tile):
+				return false
+			await _move_start(tile)
+			await werewolf_to(tile)
+		Enums.move_mode.DASH:
+			if !can_dash_to(tile):
+				return false
+			await _move_start(tile)
+			await dash_to(tile)
+		_:
+			push_error("The move mode %s is not yet managed in player class" % Globals.move_mode)
+			return false
+	return true
 
 func _can_act() -> bool:
 	return !Globals.calculating_turn and !MAIN.is_ui_blocking() and !moving
@@ -493,6 +514,8 @@ func get_hit() -> void:
 			sprite.texture = preload("res://assets/player/vampire.png")
 			return
 	Globals.lives -= 1
+	if Globals.lives <= 0:
+		died.emit()
 
 func _update_oracle_on_tile(tile: Vector2i) -> void:
 	match Globals.move_mode:

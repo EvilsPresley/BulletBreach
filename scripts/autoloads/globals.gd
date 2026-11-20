@@ -7,6 +7,9 @@ var lives: int = 1
 var level: int = 1
 var anim_duration: float = 0.5
 var calculating_turn: bool = false
+## Seed of the current run. Every randi()/shuffle() uses Godot's global RNG,
+## which is re-seeded from this value in reset(), so a run can be replayed.
+var run_seed: int = 0
 
 const sight: int = 7
 const map_sight: Vector2i = Vector2i(15, 15)
@@ -46,7 +49,10 @@ func get_direction_string(direction: Vector2i) -> String:
 			return "NW"
 	return "N"
 
-func reset() -> void:
+func reset(new_seed: int = -1) -> void:
+	run_seed = new_seed if new_seed >= 0 else randi()
+	seed(run_seed)
+	print("Run seed: %s" % run_seed)
 	move_mode = Enums.move_mode.WALK
 	turn = 0
 	night = 1

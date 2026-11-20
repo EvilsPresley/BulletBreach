@@ -108,12 +108,13 @@ func get_similar_directions(dir: Vector2i, orthogonal_move: bool) -> Array[Vecto
 	var offset: int = 2
 	if !orthogonal_move:
 		offset = 1
+	var index: int = cardinals.find(dir)
+	var cw: Vector2i = cardinals[posmod(index + offset, cardinals.size())]
+	var ccw: Vector2i = cardinals[posmod(index - offset, cardinals.size())]
 	if clockwise:
-		similar_directions.append(cardinals[(cardinals.find(dir) + offset) % cardinals.size()])
-		similar_directions.append(cardinals[(cardinals.find(dir) - offset) % cardinals.size()])
+		similar_directions.append_array([cw, ccw])
 	else:
-		similar_directions.append(cardinals[(cardinals.find(dir) - offset) % cardinals.size()])
-		similar_directions.append(cardinals[(cardinals.find(dir) + offset) % cardinals.size()])
+		similar_directions.append_array([ccw, cw])
 	return similar_directions
 
 func destroy_tile(tile: Vector2i, type: Enums.destruction_type) -> void:
@@ -206,8 +207,10 @@ func destroy_tile(tile: Vector2i, type: Enums.destruction_type) -> void:
 		entities.append_array(BUILDINGS.get_children())
 		entities.append_array(CIVILIANS.get_children())
 		entities.append_array(ENNEMIES.get_children())
-		for entity: MapObject in entities:
-			if entity:
+		for entity in entities:
+			# Entities can be freed while we await other destructions (e.g. a
+			# burning house spawning/removing neighbours), so re-check validity.
+			if is_instance_valid(entity) and !entity.is_queued_for_deletion():
 				if entity.get_map_position() == tile and entity.destructible:
 					await entity.destroy()
 		if PLAYER.get_map_position() == tile:
