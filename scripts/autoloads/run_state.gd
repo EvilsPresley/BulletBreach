@@ -28,7 +28,13 @@ func _ready() -> void:
 	Events.player_move_started.connect(_on_player_move_started)
 	Events.cooldowns_reduced.connect(reduce_cooldowns)
 
+## `new_seed` < 0: use `--seed=N` from the command line if given, else random.
+## Example: godot --path . -- --seed=1234
 func reset(new_seed: int = -1) -> void:
+	if new_seed < 0:
+		for arg: String in OS.get_cmdline_user_args():
+			if arg.begins_with("--seed="):
+				new_seed = arg.trim_prefix("--seed=").to_int()
 	run_seed = new_seed if new_seed >= 0 else randi()
 	seed(run_seed)
 	print("Run seed: %s" % run_seed)
