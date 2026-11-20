@@ -9,11 +9,10 @@ var fly_duration: int = 0
 var flight_height: int = 6
 var sanguine_pool_use: int = 0
 
-@onready var MOVE_BUTTONS: MoveButtons = $"../../Ui/MoveButtons"
 @onready var ORACLE: Control = $Oracle
-@onready var GLOBAL_OVERLAY: ColorRect = $"../../Ui/GlobalOverlay"
+@onready var MAIN: Main = owner as Main
+@onready var GLOBAL_OVERLAY: ColorRect = owner.get_node("Ui/GlobalOverlay")
 @onready var LIGHT_FOG: TileMapLayer = $LightFog
-@onready var MAIN: Main = $"../.."
 @onready var CAMERA: Camera2D = $Sprite/Camera2D
 
 signal turn_complete
@@ -100,7 +99,7 @@ func _move_start(target: Vector2i) -> void:
 	Map.re_activate_visible_ennemies(target)
 	moving = true
 	update_oracle()
-	MOVE_BUTTONS.apply_move(fly_duration > 0)
+	Events.player_move_started.emit(Globals.move_mode, fly_duration > 0)
 	await _harvest_blood(target)
 
 func can_werewolf_to(target: Vector2i) -> bool:
@@ -166,7 +165,7 @@ func can_time_travel_to(target: Vector2i) -> bool:
 	and !Map.is_under_fog(target)
 
 func time_travel_to(target: Vector2i) -> void:
-	MOVE_BUTTONS.haste(PlayerRewards.has_reward("Haste"))
+	Events.cooldowns_reduced.emit(PlayerRewards.has_reward("Haste"))
 	move_tween = create_tween()
 	move_tween.tween_property(
 		GLOBAL_OVERLAY, 
@@ -444,8 +443,9 @@ func _harvest_blood_around() -> void:
 		await _harvest_blood(get_map_position() + dir)
 
 func _harvest_blood(tile: Vector2i) -> void:
-	for civilian: Civilian in Map.CIVILIANS.get_children():
-		if civilian.get_map_position() == tile:
+	var civilians: Array = Map.get_objects_at(tile).filter(func(o): return o is Civilian)
+	for civilian: Civilian in civilians:
+		if is_instance_valid(civilian) and !civilian.is_queued_for_deletion():
 			civilian.enable_red_highlight()
 			enable_red_highlight()
 			var animation: CPUParticles2D = preload("res://scenes/ui/blood_harvest.tscn").instantiate()
@@ -455,7 +455,10 @@ func _harvest_blood(tile: Vector2i) -> void:
 			animation.modulate = Colors.RED
 			animation.gravity = (global_position - civilian.global_position) * 50
 			await Globals.wait(Globals.get_anim_duration() * 2)
-			await civilian.destroy()
+			# The civilian may have been killed by a concurrent effect (dash
+			# explosions, arrows...) while we were draining it.
+			if is_instance_valid(civilian) and !civilian.is_queued_for_deletion():
+				await civilian.destroy()
 			blood_harvested.emit()
 
 func harvest_ennemy_blood(ennemy: Ennemy) -> void:

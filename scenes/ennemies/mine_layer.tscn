@@ -14,6 +14,7 @@ shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="MineLayer" instance=ExtResource("1_ios4p")]
 script = ExtResource("2_felsq")
+intro_tuto = 12
 reload_time = 2
 
 [node name="Sprite" parent="." index="0"]

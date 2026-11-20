@@ -7,11 +7,31 @@ class_name MapObject
 @export var is_coffin: bool = false
 @export var is_portal: bool = false
 
+## Bumped whenever any map object moves, appears or disappears. The Map
+## autoload compares it with the version it last indexed (no direct reference
+## to Map here, which would create a script/scene load cycle).
+static var board_version: int = 0
+
+func _enter_tree() -> void:
+	set_notify_transform(true)
+	board_version += 1
+
+func _exit_tree() -> void:
+	board_version += 1
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSFORM_CHANGED:
+		board_version += 1
+
 func get_map_position() -> Vector2i:
 	return Map.get_map_position(global_position)
 
 func set_map_position(pos: Vector2i) -> void:
 	global_position = Map.TILEMAP.to_global(Map.TILEMAP.map_to_local(pos))
+
+## Objects that never block movement (e.g. hidden land mines).
+func is_walk_through() -> bool:
+	return false
 
 func destroy() -> void:
 	await Globals.wait_one_frame()

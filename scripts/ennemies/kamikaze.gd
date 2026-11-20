@@ -3,6 +3,13 @@ class_name Kamikaze
 
 var exploding: bool = false
 
+func get_threatened_tiles() -> Array[Vector2i]:
+	var tiles: Array[Vector2i] = []
+	if planned_action == Enums.plan.EXPLODE:
+		for cardinal: Vector2i in Map.cardinals:
+			tiles.append(get_map_position() + cardinal)
+	return tiles
+
 func _explode() -> void:
 	for cardinal: Vector2i in Map.cardinals:
 		if Map.TILEMAP.get_cell_source_id(get_map_position() + cardinal) == 0:

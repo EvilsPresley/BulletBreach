@@ -1,7 +1,7 @@
 extends Node
 class_name TurnManager
 
-@onready var MODALS: Control = $"../../Ui/Modal"
+@onready var MODALS: Control = owner.get_node("Ui/Modal")
 
 const TANK = preload("res://scenes/ennemies/tank.tscn")
 const ARTILLERY = preload("res://scenes/ennemies/artillery.tscn")
@@ -12,7 +12,7 @@ const TANK_INDEX: int = 0
 const ARTILLERY_INDEX: int = 1
 const KAMIKAZE_INDEX: int = 2
 const MINES_LAYER_INDEX: int = 3
-var first_spawns: Array[bool] = [true, true, true, true]
+var _introduced_tutos: Dictionary = {}
 
 signal turn_completed
 signal first_spawn
@@ -112,15 +112,8 @@ func spawn(number_of_spawns: int = 1) -> void:
 		spawning_ennemy.plan()
 		spawning_ennemy.display_plan()
 		spawning_ennemy.disable_highlight()
-		if spawning_ennemy is Tank and first_spawns[TANK_INDEX]:
-			first_spawns[TANK_INDEX] = false
-			first_spawn.emit(Enums.tuto.ARCHER_INTRO)
-		if spawning_ennemy is Artillery and first_spawns[ARTILLERY_INDEX]:
-			first_spawns[ARTILLERY_INDEX] = false
-			first_spawn.emit(Enums.tuto.PRIEST_INTRO)
-		if spawning_ennemy is Kamikaze and first_spawns[KAMIKAZE_INDEX]:
-			first_spawns[KAMIKAZE_INDEX] = false
-			first_spawn.emit(Enums.tuto.KAMIKAZE_INTRO)
-		if spawning_ennemy is MineLayer and first_spawns[MINES_LAYER_INDEX]:
-			first_spawns[MINES_LAYER_INDEX] = false
-			first_spawn.emit(Enums.tuto.TRACKER_INTRO)
+		Events.enemy_spawned.emit(spawning_ennemy)
+		var tuto: Enums.tuto = spawning_ennemy.intro_tuto
+		if tuto != Enums.tuto.NONE and !_introduced_tutos.has(tuto):
+			_introduced_tutos[tuto] = true
+			first_spawn.emit(tuto)

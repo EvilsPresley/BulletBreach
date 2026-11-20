@@ -56,6 +56,11 @@ func plan() -> void:
 	else:
 		planned_action = Enums.plan.STAND
 
+func get_threatened_tiles() -> Array[Vector2i]:
+	if planned_action != Enums.plan.SHOOT:
+		return []
+	return _get_artillery_targets()
+
 func _get_artillery_targets() -> Array[Vector2i]:
 	var targets: Array[Vector2i] = [planned_target]
 	var shoot_directions: Array[Vector2i] = Map.get_similar_directions(

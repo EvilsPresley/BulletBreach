@@ -20,6 +20,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
+Events="*res://scripts/autoloads/events.gd"
 Globals="*res://scripts/autoloads/globals.gd"
 Map="*res://scripts/autoloads/map.gd"
 Enums="*res://scripts/autoloads/enums.gd"

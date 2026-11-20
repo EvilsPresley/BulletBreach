@@ -10,7 +10,17 @@ func _resolve_shoot() -> void:
 		bullet.sprite.flip_h = true
 	bullet.direction = Map.vector_to_cardinal(direction)
 	await bullet._move()
-	get_parent().get_parent().get_parent().arrow_fired()
+	Events.arrow_fired.emit()
+
+func get_threatened_tiles() -> Array[Vector2i]:
+	var tiles: Array[Vector2i] = []
+	if planned_action != Enums.plan.SHOOT:
+		return tiles
+	for i: int in Globals.sight:
+		var tile: Vector2i = get_map_position() + (i + 1) * direction
+		if _can_attack(get_map_position(), tile):
+			tiles.append(tile)
+	return tiles
 
 func _can_attack(from: Vector2i, to: Vector2i) -> bool:
 	var pos_dif: Vector2i = to - from

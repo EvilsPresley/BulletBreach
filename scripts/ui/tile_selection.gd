@@ -3,7 +3,6 @@ class_name TileSelection
 
 const blink_duration: float = 0.25
 
-@onready var tile_map_layer: TileMapLayer = $"../../TileMapLayer"
 
 var blink_counter: float = 0.0
 var last_mouse_position: Vector2i = Vector2i.ZERO
@@ -17,6 +16,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		blink_counter = 0.0
 	
+	if Map.TILEMAP == null:
+		return
+	var tile_map_layer: TileMapLayer = Map.TILEMAP
 	var current_mouse_position = tile_map_layer.local_to_map(get_global_mouse_position())
 	if current_mouse_position != last_mouse_position:
 		last_mouse_position = current_mouse_position

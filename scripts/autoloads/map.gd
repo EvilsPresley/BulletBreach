@@ -33,6 +33,54 @@ const dimensions: Vector2i = Vector2i(32, 32)
 
 var poisonned_tiles: Array[TextureRect] = []
 
+# --- Occupancy index -------------------------------------------------------
+# Tile -> objects standing on it. Rebuilt lazily after anything moves
+# (MapObject bumps board_version on transform/tree changes), so queries never
+# loop over every entity of the map.
+var _occupancy: Dictionary = {}
+var _crosses: Dictionary = {}
+var _indexed_version: int = -1
+var _threats: Dictionary = {}
+var _threats_version: int = -1
+var _threats_dirty: bool = true
+
+## Call when an enemy's planned action changes.
+func invalidate_threats() -> void:
+	_threats_dirty = true
+
+func _ensure_occupancy() -> void:
+	if _indexed_version == MapObject.board_version:
+		return
+	_indexed_version = MapObject.board_version
+	_occupancy.clear()
+	_crosses.clear()
+	if TILEMAP == null:
+		return
+	for group: Node in [PROPS, BUILDINGS, CIVILIANS, ENNEMIES]:
+		if group == null:
+			continue
+		for object: MapObject in group.get_children():
+			var tile: Vector2i = object.get_map_position()
+			if !_occupancy.has(tile):
+				_occupancy[tile] = []
+			_occupancy[tile].append(object)
+	if PLAYER:
+		var player_tile: Vector2i = PLAYER.get_map_position()
+		if !_occupancy.has(player_tile):
+			_occupancy[player_tile] = []
+		_occupancy[player_tile].append(PLAYER)
+	if CROSSES:
+		for cross: MapObject in CROSSES.get_children():
+			_crosses[cross.get_map_position()] = true
+
+## Everything standing on a tile (props, buildings, civilians, enemies, player).
+func get_objects_at(tile: Vector2i) -> Array:
+	_ensure_occupancy()
+	return _occupancy.get(tile, [])
+
+func is_walkable_ground(tile: Vector2i) -> bool:
+	return TILEMAP.get_cell_source_id(tile) == 0
+
 func get_map_position(global_pos: Vector2) -> Vector2i:
 	return TILEMAP.local_to_map(global_pos)
 
@@ -79,27 +127,14 @@ func can_arrow_move(tile: Vector2i, blocked_by_player: bool = Map.PLAYER.fly_dur
 		return can_move(tile, [BUILDINGS, ENNEMIES, CIVILIANS])
 
 func can_move(tile: Vector2i, obstacles: Array[Node] = [BUILDINGS, ENNEMIES, PLAYER]) -> bool:
-	if TILEMAP.get_cell_source_id(tile) != 0:
+	if !is_walkable_ground(tile):
 		return false
-	if obstacles.find(BUILDINGS) >= 0:
-		for building: Building in Map.BUILDINGS.get_children():
-			if building.get_map_position() == tile:
+	for object: MapObject in get_objects_at(tile):
+		if object == PLAYER:
+			if obstacles.has(PLAYER):
 				return false
-	if obstacles.find(PLAYER) >= 0:
-		if PLAYER.get_map_position() == tile:
+		elif obstacles.has(object.get_parent()) and !object.is_walk_through():
 			return false
-	if obstacles.find(ENNEMIES) >= 0:
-		for ennemy: Ennemy in Map.ENNEMIES.get_children():
-			if ennemy.get_map_position() == tile and !ennemy is LandMines:
-				return false
-	if obstacles.find(PROPS) >= 0:
-		for prop: Prop in Map.PROPS.get_children():
-			if prop.get_map_position() == tile:
-				return false
-	if obstacles.find(CIVILIANS) >= 0:
-		for civilian: Civilian in Map.CIVILIANS.get_children():
-			if civilian.get_map_position() == tile:
-				return false
 	return true
 
 func get_similar_directions(dir: Vector2i, orthogonal_move: bool) -> Array[Vector2i]:
@@ -166,17 +201,9 @@ func destroy_tile(tile: Vector2i, type: Enums.destruction_type) -> void:
 				explosion.queue_free()
 			Enums.destruction_type.SHADOW:
 				var targets: Array[MapObject] = []
-				for ennemy: Ennemy in ENNEMIES.get_children():
-					if ennemy.get_map_position() == tile:
-						targets.append(ennemy)
-				for building: Building in BUILDINGS.get_children():
-					if building.get_map_position() == tile:
-						targets.append(building)
-				for civilian: Civilian in CIVILIANS.get_children():
-					if civilian.get_map_position() == tile:
-						targets.append(civilian)
-				if PLAYER.get_map_position() == tile:
-					targets.append(PLAYER)
+				for object: MapObject in get_objects_at(tile):
+					if !(object is Prop):
+						targets.append(object)
 				if targets.size() > 0:
 					var tween = create_tween().set_parallel(true)
 					for target: MapObject in targets:
@@ -203,35 +230,37 @@ func destroy_tile(tile: Vector2i, type: Enums.destruction_type) -> void:
 					await Globals.wait(anim_duration * 0.2)
 				poison.queue_free()
 		
-		var entities: Array = PROPS.get_children()
-		entities.append_array(BUILDINGS.get_children())
-		entities.append_array(CIVILIANS.get_children())
-		entities.append_array(ENNEMIES.get_children())
+		var entities: Array = get_objects_at(tile).duplicate()
 		for entity in entities:
 			# Entities can be freed while we await other destructions (e.g. a
 			# burning house spawning/removing neighbours), so re-check validity.
 			if is_instance_valid(entity) and !entity.is_queued_for_deletion():
-				if entity.get_map_position() == tile and entity.destructible:
+				if entity != PLAYER and entity.get_map_position() == tile and entity.destructible:
 					await entity.destroy()
 		if PLAYER.get_map_position() == tile:
 			if PLAYER.fly_duration == 0 or type == Enums.destruction_type.LIGHT:
 				await PLAYER.get_hit()
 
+## Enemies whose planned action will hit `tile` (cached until something changes).
+func get_threats_at(tile: Vector2i) -> Array:
+	if _threats_dirty or _threats_version != MapObject.board_version:
+		_threats_dirty = false
+		_threats_version = MapObject.board_version
+		_threats.clear()
+		if ENNEMIES:
+			for ennemy: Ennemy in ENNEMIES.get_children():
+				if ennemy.is_queued_for_destroy():
+					continue
+				for threatened: Vector2i in ennemy.get_threatened_tiles():
+					if !_threats.has(threatened):
+						_threats[threatened] = []
+					_threats[threatened].append(ennemy)
+	return _threats.get(tile, [])
+
+## True if no known enemy attack will hit `tile` for a player coming from `from`.
 func is_tile_safe(from: Vector2i, tile: Vector2i) -> bool:
-	for ennemy: Ennemy in Map.ENNEMIES.get_children():
-		if ennemy is Artillery and ennemy.planned_action == Enums.plan.SHOOT:
-			if ennemy._get_artillery_targets().find(tile) > -1:
-				return false
-		if ennemy is Kamikaze and ennemy.planned_action == Enums.plan.EXPLODE:
-			for cardinal: Vector2i in Map.cardinals:
-				if ennemy.get_map_position() + cardinal == tile:
-					return false
-		if ennemy is Tank and ennemy.planned_action == Enums.plan.SHOOT:
-			if ennemy._can_attack(ennemy.get_map_position(), tile) \
-			and ennemy.direction == Map.vector_to_cardinal(tile - ennemy.get_map_position()):
-				return false
-		if ennemy is LandMines and ennemy.get_map_position() == tile \
-		and get_orthogonal_distance(from, tile) <= 1:
+	for ennemy: Ennemy in get_threats_at(tile):
+		if ennemy.is_threat_known_from(from):
 			return false
 	return true
 
@@ -279,7 +308,5 @@ func apply_poison() -> void:
 	poisonned_tiles = []
 
 func is_tile_exhausted(tile: Vector2i) -> bool:
-	for cross: MapObject in CROSSES.get_children():
-		if cross.get_map_position() == tile:
-			return true
-	return false
+	_ensure_occupancy()
+	return _crosses.has(tile)

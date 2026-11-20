@@ -1,6 +1,10 @@
 extends Control
 class_name MoveButtons
 
+func _ready() -> void:
+	Events.player_move_started.connect(func(_mode, is_flying): apply_move(is_flying))
+	Events.cooldowns_reduced.connect(haste)
+
 func apply_move(is_flying: bool) -> void:
 	for child: Node in get_children():
 		for button: MoveButton in child.get_children():

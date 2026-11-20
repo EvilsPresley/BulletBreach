@@ -2,10 +2,18 @@ extends MobileObject
 class_name Ennemy
 
 @export var reload_time: int = 0
+## Tutorial banner shown the first time this kind of enemy appears.
+@export var intro_tuto: Enums.tuto = Enums.tuto.NONE
 var reload_counter: int = 0
 
-var planned_action: Enums.plan = Enums.plan.STAND
-var planned_target: Vector2i = Vector2i.ZERO
+var planned_action: Enums.plan = Enums.plan.STAND:
+	set(value):
+		planned_action = value
+		Map.invalidate_threats()
+var planned_target: Vector2i = Vector2i.ZERO:
+	set(value):
+		planned_target = value
+		Map.invalidate_threats()
 var explosion_tween: Tween
 
 var debug_name: String
@@ -14,6 +22,15 @@ var debug_name: String
 @onready var ORDER: Label = $Sprite/Order
 
 const BULLET = preload("res://scenes/ennemies/bullet.tscn")
+
+## Tiles hit when the planned action resolves. Override per enemy type.
+## This is the single source of truth for the oracle and civilian AI.
+func get_threatened_tiles() -> Array[Vector2i]:
+	return []
+
+## Whether a player standing on `observer` knows about this threat.
+func is_threat_known_from(_observer: Vector2i) -> bool:
+	return true
 
 func execute() -> void:
 	clear_plan()
@@ -124,6 +141,7 @@ func clear_plan():
 
 func _turn(pos_dif: Vector2i) -> void:
 	direction = Map.vector_to_cardinal(pos_dif)
+	Map.invalidate_threats()
 
 func destroy(can_harvest_blood: bool = true) -> void:
 	clear_plan()

@@ -14,6 +14,7 @@ shader_parameter/texture_region = Vector4(0, 0, 0, 0)
 
 [node name="Kamikaze" instance=ExtResource("1_7hasn")]
 script = ExtResource("2_2r708")
+intro_tuto = 11
 
 [node name="Sprite" parent="." index="0"]
 material = SubResource("ShaderMaterial_wno1c")

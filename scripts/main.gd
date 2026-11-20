@@ -73,6 +73,7 @@ func _ready() -> void:
 	Map.PLAYER = player
 	
 	player.died.connect(show_defeat)
+	Events.arrow_fired.connect(arrow_fired)
 	player.init_light_fog()
 	player.enable_highlight()
 	init_deep_fog()
