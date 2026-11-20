@@ -1,7 +1,7 @@
 extends RefCounted
 class_name Board
 ## The whole state of the current night as plain data: ground, units, poison,
-## and the random generator. Rules mutate a Board and log events; the Presenter
+## and the random generator. Rules mutate a Board and events events; the Presenter
 ## plays those events. clone() gives an independent copy (undo, previews).
 
 const SIGHT: int = 7

@@ -53,7 +53,7 @@ func plan_display_tiles(board: Board, enemy: Unit) -> Array[Vector2i]:
 			break
 	return tiles
 
-func shoot(board: Board, enemy: Unit, log: Array) -> void:
+func shoot(board: Board, enemy: Unit, events: Array) -> void:
 	Rules.fire_projectiles(board, enemy.tile, [enemy.direction],
-		Enums.destruction_type.FLAMES, "arrow", log, enemy.id)
-	log.append({"type": "arrow_fired"})
+		Enums.destruction_type.FLAMES, "arrow", events, enemy.id)
+	events.append({"type": "arrow_fired"})

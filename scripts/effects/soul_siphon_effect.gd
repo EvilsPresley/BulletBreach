@@ -1,7 +1,7 @@
 extends RewardEffect
 ## Soul Siphon: drains civilians around the player after each move.
 
-func on_move_end(board: Board, stacks: int, log: Array) -> void:
+func on_move_end(board: Board, stacks: int, events: Array) -> void:
 	var dirs: Array[Vector2i] = []
 	match stacks:
 		0:
@@ -14,4 +14,4 @@ func on_move_end(board: Board, stacks: int, log: Array) -> void:
 			dirs = Grid.cardinals.duplicate()
 			dirs.append_array([Grid.NE * 2, Grid.SE * 2, Grid.NW * 2, Grid.SW * 2])
 	for dir: Vector2i in dirs:
-		Rules.harvest_at(board, board.player.tile + dir, log)
+		Rules.harvest_at(board, board.player.tile + dir, events)

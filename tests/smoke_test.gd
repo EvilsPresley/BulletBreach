@@ -170,12 +170,12 @@ func _test_undo() -> void:
 func _pick_ability() -> MoveAbility:
 	if Map.board.player.fly_duration > 0 or randf() < 0.5:
 		return null
-	var ready: Array = []
+	var ready_abilities: Array = []
 	for frame in main.MOVE_BUTTONS.get_children():
 		for b in frame.get_children():
 			if b is MoveButton and b.ability != null and b.get_reload() == 0:
-				ready.append(b.ability)
-	return ready.pick_random() if !ready.is_empty() else null
+				ready_abilities.append(b.ability)
+	return ready_abilities.pick_random() if !ready_abilities.is_empty() else null
 
 func _candidate_tiles() -> Array:
 	var ability: MoveAbility = player.get_active_ability()

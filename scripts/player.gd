@@ -16,11 +16,15 @@ var flight_step_ability: MoveAbility = FlightStepAbility.new()
 @onready var LIGHT_FOG: TileMapLayer = $LightFog
 @onready var CAMERA: Camera2D = $Sprite/Camera2D
 
+@warning_ignore("unused_signal")
 signal turn_complete
+@warning_ignore("unused_signal")
 signal blood_harvested
 signal church_exhausted
 signal sun_exhausted
+@warning_ignore("unused_signal")
 signal enter_coffin
+@warning_ignore("unused_signal")
 signal died
 
 func intro() -> void:

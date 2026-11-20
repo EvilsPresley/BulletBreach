@@ -15,41 +15,41 @@ func register(unit_id: int, node: MapObject) -> void:
 	node.unit_id = unit_id
 	views[unit_id] = node
 
-func play(log: Array) -> void:
+func play(events: Array) -> void:
 	busy = true
-	await _play_range(log, 0, log.size())
+	await _play_range(events, 0, events.size())
 	busy = false
 
-func _play_range(log: Array, start: int, end: int) -> void:
+func _play_range(events: Array, start: int, end: int) -> void:
 	var i: int = start
 	while i < end:
-		var event: Dictionary = log[i]
+		var event: Dictionary = events[i]
 		if event.type == "parallel_begin":
-			var close: int = _matching_end(log, i)
-			await _play_parallel(log, i + 1, close)
+			var close: int = _matching_end(events, i)
+			await _play_parallel(events, i + 1, close)
 			i = close + 1
 		else:
 			await _play_event(event)
 			i += 1
 
-func _matching_end(log: Array, begin: int) -> int:
+func _matching_end(events: Array, begin: int) -> int:
 	var depth: int = 0
-	for i: int in range(begin, log.size()):
-		if log[i].type == "parallel_begin":
+	for i: int in range(begin, events.size()):
+		if events[i].type == "parallel_begin":
 			depth += 1
-		elif log[i].type == "parallel_end":
+		elif events[i].type == "parallel_end":
 			depth -= 1
 			if depth == 0:
 				return i
-	return log.size() - 1
+	return events.size() - 1
 
 ## Splits a parallel block into groups (each starting at a top-level
 ## tile_effect) and plays the groups at the same time.
-func _play_parallel(log: Array, start: int, end: int) -> void:
+func _play_parallel(events: Array, start: int, end: int) -> void:
 	var groups: Array = []
 	var depth: int = 0
 	for i: int in range(start, end):
-		var type: String = log[i].type
+		var type: String = events[i].type
 		if depth == 0 and (groups.is_empty() or type == "tile_effect"):
 			groups.append([i, i + 1])
 		else:
@@ -60,17 +60,19 @@ func _play_parallel(log: Array, start: int, end: int) -> void:
 			depth -= 1
 	var pending: Array[int] = [groups.size()]
 	for group: Array in groups:
-		_play_group(log, group[0], group[1], pending)
+		_play_group(events, group[0], group[1], pending)
 	while pending[0] > 0:
 		await get_tree().process_frame
 
-func _play_group(log: Array, start: int, end: int, pending: Array[int]) -> void:
-	await _play_range(log, start, end)
+func _play_group(events: Array, start: int, end: int, pending: Array[int]) -> void:
+	await _play_range(events, start, end)
 	pending[0] -= 1
 
 func _view(id: int) -> MapObject:
 	var node = views.get(id)
-	return node if is_instance_valid(node) else null
+	if is_instance_valid(node):
+		return node
+	return null
 
 func _play_event(event: Dictionary) -> void:
 	var player: Player = Map.PLAYER
@@ -219,7 +221,9 @@ func _spawn_view(event: Dictionary) -> MapObject:
 
 func _play_projectiles(event: Dictionary) -> void:
 	var shooter: MapObject = _view(event.owner)
-	var parent: Node = shooter if shooter else Map.TILEMAP
+	var parent: Node = Map.TILEMAP
+	if shooter:
+		parent = shooter
 	var bullets: Array[Bullet] = []
 	for path: Dictionary in event.paths:
 		var bullet: Bullet = preload("res://scenes/ennemies/bullet.tscn").instantiate()

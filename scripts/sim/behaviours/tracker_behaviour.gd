@@ -11,5 +11,5 @@ func plan(board: Board, enemy: Unit) -> void:
 	else:
 		enemy.planned_action = Enums.plan.SHOOT
 
-func shoot(board: Board, enemy: Unit, log: Array) -> void:
-	Rules.spawn_enemy(board, mine, enemy.tile, log)
+func shoot(board: Board, enemy: Unit, events: Array) -> void:
+	Rules.spawn_enemy(board, mine, enemy.tile, events)

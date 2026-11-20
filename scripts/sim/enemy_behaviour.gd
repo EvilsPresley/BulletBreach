@@ -24,26 +24,26 @@ func is_threat_known(_board: Board, _enemy: Unit, _observer: Vector2i) -> bool:
 	return true
 
 ## Resolve the action planned last turn.
-func execute(board: Board, enemy: Unit, log: Array) -> void:
+func execute(board: Board, enemy: Unit, events: Array) -> void:
 	match enemy.planned_action:
 		Enums.plan.SHOOT:
-			shoot(board, enemy, log)
+			shoot(board, enemy, events)
 			if enemy.reload_time > 0:
 				enemy.reload_counter = enemy.reload_time
 		Enums.plan.RELOAD:
 			enemy.reload_counter -= 1
 		Enums.plan.EXPLODE:
-			explode(board, enemy, log)
+			explode(board, enemy, events)
 
-func shoot(_board: Board, _enemy: Unit, _log: Array) -> void:
+func shoot(_board: Board, _enemy: Unit, _events: Array) -> void:
 	pass
 
-func explode(_board: Board, _enemy: Unit, _log: Array) -> void:
+func explode(_board: Board, _enemy: Unit, _events: Array) -> void:
 	pass
 
 ## Default movement: one step toward the player, preferring a tile from
 ## which it can attack.
-func move(board: Board, enemy: Unit, log: Array) -> void:
+func move(board: Board, enemy: Unit, events: Array) -> void:
 	var pos_dif: Vector2i = board.player.tile - enemy.tile
 	if Grid.cardinals.has(pos_dif):
 		return
@@ -51,15 +51,15 @@ func move(board: Board, enemy: Unit, log: Array) -> void:
 	for dir: Vector2i in board.similar_directions(toward, false):
 		if board.can_enemy_move(enemy.tile + dir) \
 		and can_attack(board, enemy, enemy.tile + dir, board.player.tile):
-			Rules.step_enemy(board, enemy, dir, log)
+			Rules.step_enemy(board, enemy, dir, events)
 			return
 	for dir: Vector2i in board.similar_directions(toward, false):
 		if board.can_enemy_move(enemy.tile + dir):
-			Rules.step_enemy(board, enemy, dir, log)
+			Rules.step_enemy(board, enemy, dir, events)
 			return
 
 ## Called when something destroys this enemy. Return true if handled here.
-func on_destroyed(_board: Board, _enemy: Unit, _log: Array) -> bool:
+func on_destroyed(_board: Board, _enemy: Unit, _events: Array) -> bool:
 	return false
 
 ## Extra data the view needs to draw the plan (e.g. arrow path).

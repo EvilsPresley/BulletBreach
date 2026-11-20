@@ -15,10 +15,10 @@ func can_target(board: Board, tile: Vector2i) -> bool:
 			return true
 	return false
 
-func simulate(board: Board, tile: Vector2i, log: Array) -> void:
+func simulate(board: Board, tile: Vector2i, events: Array) -> void:
 	var player: Unit = board.player
 	player.direction = Grid.vector_to_cardinal(tile - player.tile)
-	log.append({"type": "werewolf_strike", "tile": tile})
+	events.append({"type": "werewolf_strike", "tile": tile})
 	for building: Unit in board.find_at(tile, Unit.Kind.BUILDING):
 		if building.shelters_civilian:
 			# The house is torn open: its civilian is drained on the spot.
@@ -27,17 +27,17 @@ func simulate(board: Board, tile: Vector2i, log: Array) -> void:
 			civilian.tile = tile
 			civilian.scene = load(Rules.CIVILIAN_PATH)
 			board.add_unit(civilian)
-			log.append({"type": "spawned", "id": civilian.id, "kind": civilian.kind, "tile": tile, "scene": civilian.scene})
-			Rules._remove(board, building, log)
+			events.append({"type": "spawned", "id": civilian.id, "kind": civilian.kind, "tile": tile, "scene": civilian.scene})
+			Rules._remove(board, building, events)
 			var ruins := Unit.new()
 			ruins.kind = Unit.Kind.PROP
 			ruins.tile = tile
 			ruins.destructible = false
 			ruins.scene = building.ruins_scene if building.ruins_scene else load(Rules.DEFAULT_RUINS_PATH)
 			board.add_unit(ruins)
-			log.append({"type": "spawned", "id": ruins.id, "kind": ruins.kind, "tile": tile, "scene": ruins.scene})
-			Rules.harvest_at(board, tile, log)
+			events.append({"type": "spawned", "id": ruins.id, "kind": ruins.kind, "tile": tile, "scene": ruins.scene})
+			Rules.harvest_at(board, tile, events)
 	for enemy: Unit in board.find_at(tile, Unit.Kind.ENEMY):
-		Rules.destroy_unit(board, enemy, log, false, false)
-	Rules.move_player(board, tile, "werewolf", log)
-	Rules.move_end(board, log, true)
+		Rules.destroy_unit(board, enemy, events, false, false)
+	Rules.move_player(board, tile, "werewolf", events)
+	Rules.move_end(board, events, true)

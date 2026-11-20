@@ -73,9 +73,9 @@ func play_player_turn(ability: MoveAbility, tile: Vector2i) -> bool:
 		"board": board.clone(),
 		"run": RunState.snapshot(),
 	}
-	var log: Array = Rules.play_turn(board, ability, tile,
+	var events: Array = Rules.play_turn(board, ability, tile,
 		RunState.turn + 1, RunState.night, spawn_table)
-	await presenter.play(log)
+	await presenter.play(events)
 	turn_completed.emit()
 	return true
 
@@ -97,17 +97,17 @@ func undo_last_turn() -> bool:
 ## Rest in a coffin: new night, enemies replaced by a bigger wave.
 func start_new_night() -> void:
 	var board: Board = Map.board
-	var log: Array = []
+	var events: Array = []
 	for enemy: Unit in board.enemies():
 		board.remove_unit(enemy)
-		log.append({"type": "destroyed", "id": enemy.id})
+		events.append({"type": "destroyed", "id": enemy.id})
 	board.poison_tiles.clear()
 	RunState.night += 1
 	RunState.turn = 1
-	Rules.spawn_wave(board, RunState.night * 3, spawn_table, log)
+	Rules.spawn_wave(board, RunState.night * 3, spawn_table, events)
 	for prop: Unit in board.find_at(board.player.tile, Unit.Kind.PROP):
 		if prop.is_coffin:
-			Rules._remove(board, prop, log)
+			Rules._remove(board, prop, events)
 	_undo = {}
 	Map.clear_poison_markers()
-	await presenter.play(log)
+	await presenter.play(events)

@@ -12,6 +12,6 @@ func threatened_tiles(_board: Board, enemy: Unit) -> Array[Vector2i]:
 func is_threat_known(_board: Board, enemy: Unit, observer: Vector2i) -> bool:
 	return Grid.distance(observer, enemy.tile) <= 1
 
-func move(board: Board, enemy: Unit, log: Array) -> void:
+func move(board: Board, enemy: Unit, events: Array) -> void:
 	if board.player.tile == enemy.tile:
-		Rules.destroy_tile(board, enemy.tile, Enums.destruction_type.EXPLOSION, log)
+		Rules.destroy_tile(board, enemy.tile, Enums.destruction_type.EXPLOSION, events)

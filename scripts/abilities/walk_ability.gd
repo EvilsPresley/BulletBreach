@@ -14,7 +14,7 @@ func can_target(board: Board, tile: Vector2i) -> bool:
 		return false
 	return board.can_move(tile)
 
-func simulate(board: Board, tile: Vector2i, log: Array) -> void:
+func simulate(board: Board, tile: Vector2i, events: Array) -> void:
 	board.player.direction = tile - board.player.tile
-	Rules.move_player(board, tile, "walk", log)
-	Rules.move_end(board, log, false)
+	Rules.move_player(board, tile, "walk", events)
+	Rules.move_end(board, events, false)

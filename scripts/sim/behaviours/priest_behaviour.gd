@@ -29,6 +29,6 @@ func threatened_tiles(_board: Board, enemy: Unit) -> Array[Vector2i]:
 		return []
 	return targets(enemy)
 
-func shoot(board: Board, enemy: Unit, log: Array) -> void:
+func shoot(board: Board, enemy: Unit, events: Array) -> void:
 	for tile: Vector2i in targets(enemy):
-		Rules.destroy_tile(board, tile, Enums.destruction_type.LIGHT, log)
+		Rules.destroy_tile(board, tile, Enums.destruction_type.LIGHT, events)

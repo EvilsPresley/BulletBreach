@@ -20,24 +20,24 @@ func threatened_tiles(_board: Board, enemy: Unit) -> Array[Vector2i]:
 			tiles.append(enemy.tile + cardinal)
 	return tiles
 
-func explode(board: Board, enemy: Unit, log: Array) -> void:
+func explode(board: Board, enemy: Unit, events: Array) -> void:
 	if enemy.exploding:
 		return
 	enemy.exploding = true
-	log.append({"type": "parallel_begin"})
+	events.append({"type": "parallel_begin"})
 	for cardinal: Vector2i in Grid.cardinals:
-		Rules.destroy_tile(board, enemy.tile + cardinal, Enums.destruction_type.EXPLOSION, log)
-	log.append({"type": "parallel_end"})
-	Rules.kill_enemy(board, enemy, log, false)
+		Rules.destroy_tile(board, enemy.tile + cardinal, Enums.destruction_type.EXPLOSION, events)
+	events.append({"type": "parallel_end"})
+	Rules.kill_enemy(board, enemy, events, false)
 
-func move(board: Board, enemy: Unit, log: Array) -> void:
+func move(board: Board, enemy: Unit, events: Array) -> void:
 	if !enemy.exploding:
-		super(board, enemy, log)
+		super(board, enemy, events)
 
 ## Killed by anything else: it still blows up (no blood for Soul Spores).
-func on_destroyed(board: Board, enemy: Unit, log: Array) -> bool:
+func on_destroyed(board: Board, enemy: Unit, events: Array) -> bool:
 	if !enemy.exploding:
-		explode(board, enemy, log)
+		explode(board, enemy, events)
 	else:
-		Rules.kill_enemy(board, enemy, log, false)
+		Rules.kill_enemy(board, enemy, events, false)
 	return true
